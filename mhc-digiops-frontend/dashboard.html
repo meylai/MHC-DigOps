@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+
+<body>
+    <h2>Admin Dashboard</h2>
+    <table id="applicationsTable">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Location</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <table>
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="applicationsTable"></tbody>
+    </table>
+
+    <h3>IoT Alerts</h3>
+    <ul id="alertsList"></ul>
+    <div id="map">
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    </div>
+    <script src="js/dashboard.js"></script>
+    
+    
+</body>
+
+</html>
