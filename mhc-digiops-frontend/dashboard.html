@@ -6,42 +6,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="css/style.css">
+
+    <!-- Leaflet CSS for GIS map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <!--Chart.js-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- socket.io (real-time listener) -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <!-- chart.js-->
+     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-    <h2>Admin Dashboard</h2>
-    <table id="applicationsTable">
-        <thead>
-            <tr>
-                <th>User</th>
-                <th>Location</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
 
-    <table>
-        <thead>
-            <tr>
-                <th>User</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="applicationsTable"></tbody>
-    </table>
+    <div class="dashboard">
 
-    <h3>IoT Alerts</h3>
-    <ul id="alertsList"></ul>
+        <!-- Dashboard Header -->
+        <header class="header">
+            <h1>Admin Dashboard</h1>
+            <p>Housing Management & Service Delivery Platform</p>
+        </header>
+
+        <!-- KPI CARDS -->
+        <section class="kpi-section">
+            <div class="kpi-card">
+                <h3>Total Applications:</h3>
+                <p id="totalApplications">0</p>
+            </div>
+            <div class="kpi-card">
+                <h3>Available Houses:</h3>
+                <p id="availableHouses">0</p>
+            </div>
+            <div class="kpi-card">
+                <h3>Occupied Houses:</h3>
+                <p id="occupiedHouses">0</p>
+            </div>
+        </section>
+
+        <!--LIVE ALERTS -->
+        <section class="alerts-section">
+            <h2>Live IoT Alerts</h2>
+            <ul id="alertsContainer"></ul>
+        </section>
+
+        <!-- GIS MAP -->
+        <section class="map-section">
+            <h2>GIS Property Map</h2>
+            <div id="map"></div>
+        </section>
+
+        <!-- RECENT APPLICATIONS -->
+        <section class="applications-section">
+            <h2>Recent Applications</h2>
+            <table id="applicationsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- CHART ANALYTICS -->
+        <section class="chart-section">
+            <h2>Chart Analytics</h2>
+            <canvas id="kpiChart"></canvas>
+        </section>
+
+        <div class="legend">
+            <p>Green = Available</p>
+            <p>Red = Alert</p>
+            <p>Blue = Occupied</p>
+        </div>
+
+    </div>          
+
+       
     <div id="map">
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     </div>
     <script src="js/dashboard.js"></script>
-    
-    
+
+
 </body>
 
 </html>

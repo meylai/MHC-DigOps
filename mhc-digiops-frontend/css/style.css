@@ -1,6 +1,7 @@
 body {
   font-family: Arial, sans-serif;
   padding: 20px;
+  background: #f4f4f4;
 }
 
 input, button {
@@ -21,4 +22,111 @@ th, td {
 #map {
   height: 400px;
   width: 100%;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.dashboard {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.kpi-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.kpi-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.alerts-section,
+.map-section,
+.applications-section,
+.chart-section {
+  background: white;
+  padding:20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+#map {
+  height: 400px;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th,
+table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .kpi-section {
+    grid-template-columns: 1fr;
+  }
+
+  #map {
+    height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+
+  thead tr {
+    display: none;
+  }
+
+  td {
+    position: relative;
+    padding-left: 50%;
+  }
+
+  td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0;
+    top: 0;
+    padding: 10px;
+    font-weight: bold;
+    background-color: #f0f0f0;
+    width: 50%;
+    box-sizing: border-box;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+}
+
+canvas {
+  width: 100% !important;
+  height: auto !important;
 }

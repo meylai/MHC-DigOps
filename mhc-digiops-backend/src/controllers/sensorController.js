@@ -4,19 +4,24 @@ const prisma = new PrismaClient();
 
 export const sensorAlert = async (req, res) => {
   try {
-    const { houseId, alertType } = req.body;
+    const { houseId, type, value, alertType } = req.body;
 
-    console.log("🚨 Sensor Alert Received:", { houseId, alertType });
+    console.log("🚨 Sensor Alert Received:", { houseId, type, value, alertType });
 
     // Save sensor data
     const alert = await prisma.sensorData.create({
       data: {
+        houseId: houseId,
         type: alertType,
         value: 1,
         timestamp: new Date(),
-        houseId: houseId,
+        
       },
     });
+
+    req.app.get("io").emit("newAlert", alert);
+
+    res.status(201).json(alert);
 
     console.log("Alert saved to DB with ID:", alert.id);
 
