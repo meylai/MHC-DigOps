@@ -66,6 +66,17 @@ new Chart(ctx, {
     }
 });
 
+//connection to backend for real data
+fetch("http://localhost:3000/api/admin/dashboard")
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("applicationsCount").textContent = data.applications;
+        document.getElementById("tenantsCount").textContent = data.tenants;
+        document.getElementById("alertsCount").textContent = data.alerts;
+    })
+    .catch(error => console.error("Dashboard error:", error));
+
+
 const token = localStorage.getItem("token");
 
 async function loadApplications() {
