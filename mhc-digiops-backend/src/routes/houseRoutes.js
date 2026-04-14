@@ -1,6 +1,6 @@
 import express from "express";
-import { getHousesForMap } from "../controllers/houseController";
-import { getHouseDetails } from "../controllers/houseController";
+import { getHousesForMap } from "../controllers/houseController.js";
+import { getHouseDetails } from "../controllers/houseController.js";
 
 const router = express.Router();
 

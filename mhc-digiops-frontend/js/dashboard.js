@@ -184,6 +184,15 @@ fetch("http://localhost:3000/api/admin/dashboard")
     })
     .catch(error => console.error("Dashboard error:", error));
 
+fetch("http://localhost:3000/api/admin/dashboard/stats", {
+    headers: {
+        Authorization: `Bearer ${token}`
+    }
+})
+    .then(res => res.json())
+    .then(data => {
+        console.log(data);
+    });
 
 const token = localStorage.getItem("token");
 

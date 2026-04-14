@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export const getDashboardStats = async (req, res) => {
+export const getAdminDashboardStats = async (req, res) => {
     try {
         const applications = await prisma.landApplication.count();
         const tenants = await prisma.tenant.count();
@@ -16,7 +16,10 @@ export const getDashboardStats = async (req, res) => {
             houses
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server error" });
+        console.error("Admin dashboard stats error:", error);
+
+        res.status(500).json({ 
+            message: "Failed to fetch admin dashboard statistics"
+        });
     }
 };
