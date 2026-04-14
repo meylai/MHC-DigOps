@@ -9,13 +9,14 @@ export const createLandAcquisition = async (req, res) => {
         });
 
         res.status(201).json({
-            message: "Land acquisition form saved successfully",
-            acquisition
+            message: "Land acquisition form submitted successfully",
+            data: acquisition
         });
     } catch (error) {
-        console.error(error);
+        console.error("Database error:", error);
+
         res.status(500).json({
-            message: "Server error"
+            message: "Server error, failed to submit form"
         });
     }
 };

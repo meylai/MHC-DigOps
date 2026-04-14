@@ -61,16 +61,35 @@ document.getElementById("landForm").addEventListener("submit", async (e) => {
 
         notes: document.getElementById("notes").value
     };
+    
+    try {
+        const res = await fetch("http://localhost:3000/api/land-acquisition", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
 
-    const res = await fetch("http://localhost:3000/api/land-acquisition", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-    });
+        const data = await res.json();
 
-    const data = await res.json();
+        if (res.ok) {
+            alert("Form submitted successfully!");
+
+            form.reset();
+
+            document.getElementById("customaryFields").classList.add("hidden");
+            document.getElementById("leaseFields").classList.add("hidden");
+            document.getElementById("agriculturalFields").classList.add("hidden");
+            document.getElementById("governmentFields").classList.add("hidden");
+        } else {
+            alert(data.message || "Submission failed");
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert("Server error. Please try again.");
+    }
 
     document.getElementById("message").innerText =
         data.message || "Submitted successfully";
