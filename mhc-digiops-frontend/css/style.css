@@ -2,6 +2,8 @@ body {
   font-family: Arial, sans-serif;
   padding: 20px;
   background: #f4f4f4;
+  background-color: #f4f6f8;
+  margin: 0;
 }
 
 input, button {
@@ -53,6 +55,13 @@ th, td {
   border-radius: 10px;
   font-size: 18px;
   font-weight: bold;
+}
+
+.details-section {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
 }
 
 .alerts-section,
@@ -129,4 +138,128 @@ table td {
 canvas {
   width: 100% !important;
   height: auto !important;
+}
+
+/*house details button */
+.button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.button:hover {
+  background: #0056b3;
+}
+ul button {
+  margin-left: 10px;
+}
+
+/* Land Acquisition Form Styles*/
+.header-banner {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.header-banner h1 {
+  margin: 0;
+  font-size: 32px;
+  color: #1f2937;
+}
+.header-banner p {
+  margin: 5px 0 0;
+  font-size: 16px;
+  color: #6b7280;
+}
+
+/* ===== FORM CONTAINER ===== */
+.form-container {
+    max-width: 700px;
+    margin: 40px auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== FORM TITLE ===== */
+.form-container h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    color: #1f2937;
+    font-size: 28px;
+}
+
+/* ===== LABELS ===== */
+label {
+    display: block;
+    margin-bottom: 6px;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #374151;
+}
+
+/* ===== INPUTS / SELECT / TEXTAREA ===== */
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 4px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 14px;
+    background-color: #ffffff;
+}
+
+/* ===== TEXTAREA ===== */
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* ===== FOCUS EFFECT ===== */
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 4px rgba(37, 99, 235, 0.3);
+}
+
+/* ===== SUBMIT BUTTON ===== */
+button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 20px;
+    background-color: #1f2937;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+/* ===== BUTTON HOVER ===== */
+button:hover {
+    background-color: #111827;
+}
+
+/* ===== SUCCESS / ERROR MESSAGE ===== */
+#message {
+    margin-top: 15px;
+    text-align: center;
+    font-weight: bold;
+    color: #16a34a;
+}
+.hidden {
+  display: none;
+}
+
+.condition-section {
+  margin-top: 15px;
 }

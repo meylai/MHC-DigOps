@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MHC Land Acquisition Form</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <div class="form-container">
+    <div class="header-banner">
+      <h1>MHC DigiOps</h1>
+      <p>Land Acquisition & Due Diligence Form</p>
+    </div><br><br>
+
+    <form id="landForm">
+
+      <label for="formType">Land Acquisition Type</label>
+      <select id="formType" required>
+        <option value="">Select Form</option>
+        <option value="customary">Form 1 - Customary Land</option>
+        <option value="lease">Form 2 - General Lease</option>
+        <option value="agricultural">Form 3 - Agricultural Lease</option>
+        <option value="government">Form 26 - Government Acquisition</option>
+      </select><br><br>
+
+      <!-- Common Fields -->
+      <label for="sellerName">Land Owner Full Name:</label>
+      <input type="text" id="sellerName" placeholder="Land Owner Full Name" required><br><br>
+
+      <label for="idCopy">National ID:</label>
+      <input type="file" id="idCopy" placeholder="National ID" accept=".pdf,.jpg,.jpeg,.png"><br><br>
+
+      <label for="region">Region / District:</label>
+      <input type="text" id="region" placeholder="Region / District" required><br><br>
+
+      <label for="landLocation">Land Location:</label>
+      <input type="text" id="landLocation" placeholder="Land Location" required><br><br>
+
+      <label for="landSize">Land Size (hectares):</label>
+      <input type="text" id="landSize" placeholder="Land Size (hectares)" required><br><br>
+
+      <label for="ownershipProof">Proof of Ownership:</label>
+      <input type="file" id="ownershipProof" placeholder="Proof of Ownership" accept=".pdf,.jpg,.jpeg,.png"><br><br>
+
+      <label for="purpose">Purpose of Purchase:</label>
+      <input type="text" id="purpose" placeholder="Purpose of Purchase" required><br><br>
+
+      <label for="landMap">Land Map / Survey:</label>
+      <input type="file" id="landMap" placeholder="Land Map / Survey" accept=".pdf,.jpg,.jpeg,.png"><br><br>
+
+
+      <!-- FORM 1 SECTION -->
+      <div id="customaryFields" class="conditional-section hidden">
+        <label for="Chief / Village Head Name">Cheif / Village Head Name:</label>
+        <input type="text" id="villageChief" placeholder="Chief / Village Head Name"><br><br>
+
+        <label for="Chief Signature / Approval Code">Chief Signinature / Approval Code:</label>
+        <input type="text" id="chiefSignature" placeholder="Chief Signature / Approval"><br><br>
+
+
+        <label for="Witness / Village Headman">Witness / Village Headmam:</label>
+        <input type="text" id="witnessName" placeholder="Witness / Village Headman">
+      </div>
+
+      <!-- FORM 2 & 3 SECTION -->
+      <div id="leaseFields" class="conditional-section hidden">
+        <label for="Lease Duration (years)">Lease Duration (Years):</label>
+        <input type="text" id="leaseDuration" placeholder="Lease Duration (years)">
+      </div>
+
+      <!-- FORM 3 ONLY -->
+      <div id="agriculturalFields" class="conditional-section hidden">
+        <label for="Agricultural Plan">Agricultural Plan:</label>
+        <textarea id="agriculturalPlan" placeholder="Agricultural Plan"></textarea>
+      </div>
+
+      <!-- FORM 26 SECTION -->
+      <div id="governmentFields" class="conditional-section hidden">
+        <label for="valuation Report Reference">Valuation Report Reference:</label>
+        <input type="file" id="valuationReprt" placeholder="Valuation Report Reference" accept=".pdf,.jpg,.jpeg,.png"><br><br>
+        <label for="Ministry of Lands Approval">Ministry of Lands Approval:</label>
+        <input type="text" id="ministryApproval" placeholder="Ministry of Lands Approval">
+      </div>
+
+      <textarea id="notes" placeholder="Additional Notes"></textarea><br><br>
+
+      <button type="submit">Submit Acquisition Form</button>
+    </form>
+
+    <p id="message"></p>
+  </div>
+
+  <script src="js/land-acquisition.js"></script>
+</body>
+
+</html>

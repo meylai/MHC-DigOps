@@ -56,6 +56,12 @@ const alertIcon = L.icon({
 
 L.marker([lat, lng], { icon: alertIcon })
 
+const icon = house.status === "Occupied" 
+    ? occupiedIcon 
+    : availableIcon;
+    
+L.marker([house.latitude, house.longitude], { icon }).addTo(map);
+
 async function loadMapData() {
   const res = await fetch("http://localhost:3000/api/applications", {
     headers: {

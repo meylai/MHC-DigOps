@@ -6,6 +6,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import { Server } from "socket.io";
 import http from "http";
 import houseRoutes from "./routes/houseRoutes.js";
+import landAcquisitionRoutes from "./routes/landAcquisitionRoutes.js";
 
 
 const app = express();
@@ -27,6 +28,7 @@ app.use("/api", authRoutes);
 app.use("/api", applicationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/houses", houseRoutes);
+app.use("/api/land-acquisition", landAcquisitionRoutes);
 
 app.get("/", (req, res) => {
   res.send("MHC-DigiOps API Running");

@@ -96,5 +96,25 @@ model SensorData {
   house     House    @relation(fields: [houseId], references: [id])
 }
 
-
+model LandAcquisition {
+  id               Int      @id @default(autoincrement())
+  formType         String
+  sellerName       String
+  nationalId       String
+  region           String
+  landLocation     String
+  landSize         String
+  ownershipProof   String
+  purpose          String
+  landMap          String
+  villageChief     String?
+  chiefSignature   String?
+  wtnessName       String?
+  leaseDuration    String?
+  agriculturePlan  String?
+  valuationReport  String?
+  ministryApproval String?
+  notes            String?
+  createdAt        DateTime @default(now())
+}
 
