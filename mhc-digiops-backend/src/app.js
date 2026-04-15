@@ -7,6 +7,8 @@ import { Server } from "socket.io";
 import http from "http";
 import houseRoutes from "./routes/houseRoutes.js";
 import landAcquisitionRoutes from "./routes/landAcquisitionRoutes.js";
+import maintenanceRoutes from "./routes/maintenanceRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 
 const app = express();
@@ -26,6 +28,8 @@ app.set("io", io);
 
 app.use("/api", authRoutes);
 app.use("/api", applicationRoutes);
+app.use("/api", maintenanceRoutes);
+app.use("/api", paymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/houses", houseRoutes);
 app.use("/api/land-acquisition", landAcquisitionRoutes);

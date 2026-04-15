@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - MHC DigiOps</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+    <div class="user-dashboard-container">
+
+        <!-- SIDEBAR -->
+        <aside class="user-sidebar">
+            <h2>MHC DigiOps</h2>
+            <ul>
+                <li><a href="#" onclick="showSection('overview')">Dashboard</a></li>
+                <li><a href="#" onclick="showSection('land')">Sell Land</a></li>
+                <li><a href="#" onclick="showSection('maintenance')">Maintenance</a></li>
+                <li><a href="#" onclick="showSection('rent')">Rent Payments</a></li>
+                <li><a href="#" onclick="showSection('history')">Payment History</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="user-main-content">
+
+            <section id="overview" class="section active">
+                <h1>Welcome to Your Dashboard</h1>
+                <div class="user-cards">
+                    <div class="user-card">
+                        <h3>Land Applications</h3>
+                        <p id="applicationsCount">0</p>
+                    </div>
+
+                    <div class="user-card">
+                        <h3>Maintenance Requests</h3>
+                        <p id="maintenanceCount">0</p>
+                    </div>
+
+                    <div class="user-card">
+                        <h3>Rent Status</h3>
+                        <p>Paid</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="land" class="user-section">
+                <h2>Sell Land to MHC</h2>
+                <button onclick="window.location.href='land-acquisition.html'">
+                    Open Land Form
+                </button>
+            </section>
+
+            <section id="maintenance" class="user-section">
+                <h2>Maintenance Request</h2>
+                <textarea id="maintenanceText"
+                    placeholder="Describe issue"></textarea>
+                <button onclick="submitMaintenance()">
+                    Submit Request
+                </button>
+            </section>
+
+            <section id="rent" class="user-section">
+                <h2>Pay Rent</h2>
+                <input type="number" id="rentAmount"
+                    placeholder="Enter amount">
+                <button onclick="payRent()">Pay Now</button>
+            </section>
+
+            <section id="history" class="user-section">
+                <h2>Payment History</h2>
+                <div id="user-paymentHistory">
+                    No payments yet
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <script src="js/user-dashboard.js"></script>
+</body>
+</html>
