@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard - MHC DigiOps</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
     <div class="user-dashboard-container">
@@ -46,7 +48,70 @@
                 </div>
             </section>
 
-            
+            <div class="user-dashboard-grid">
+
+                <!-- USER PROFILE -->
+                <div class="user-profile-card">
+                    <h3>User Profile</h3>
+                    <p><strong>Name:</strong> <span id="profileName">John Banda</span></p>
+                    <p><strong>Email:</strong> <span id="profileEmail">john@email.com</span></p>
+                    <p><strong>House:</strong> House A12</p>
+                    <p><strong>Status:</strong> Active Tenant</p>
+                </div>
+
+                <!-- NOTIFICATIONS -->
+                <div class="user-notification-card">
+                    <h3>Notifications</h3>
+                    <ul id="notificationsList">
+                        <li>Rent due on 30 April</li>
+                        <li>Maintenance team assigned</li>
+                        <li>Land application under review</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- RECENT ACTIVITY -->
+            <div class="user-activity-section">
+                <h3>Recent Activity</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Activity</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-activityTable">
+                        <tr>
+                            <td>15/04/2026</td>
+                            <td>Maintenance Request</td>
+                            <td>Pending</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAYMENT HISTORY -->
+            <div class="user-activity-section">
+                <h3>Payment History</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentTable">
+                        <tr>
+                            <td>10/04/2026</td>
+                            <td>MWK 50,000</td>
+                            <td>Mpamba</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
             <section id="land" class="user-section">
                 <h2>Sell Land to MHC</h2>
@@ -57,8 +122,7 @@
 
             <section id="maintenance" class="user-section">
                 <h2>Maintenance Request</h2>
-                <textarea id="maintenanceText"
-                    placeholder="Describe issue"></textarea>
+                <textarea id="maintenanceText" placeholder="Describe issue"></textarea>
                 <button onclick="submitMaintenance()">
                     Submit Request
                 </button>
@@ -66,8 +130,7 @@
 
             <section id="rent" class="user-section">
                 <h2>Pay Rent</h2>
-                <input type="number" id="rentAmount"
-                    placeholder="Enter amount">
+                <input type="number" id="rentAmount" placeholder="Enter amount">
                 <button onclick="payRent()">Pay Now</button>
             </section>
 
@@ -84,4 +147,5 @@
 
     <script src="js/user-dashboard.js"></script>
 </body>
+
 </html>

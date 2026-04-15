@@ -14,15 +14,25 @@ export const createMaintenanceRequest = async (req, res) => {
             }
         });
 
+        //notification to admin
+        await prisma.notification.create({
+            data: {
+                message: `New maintenance request from tenant ${tenantId}`,
+                type: "Maintenance",
+                description: description,
+                tenantId: Number(tenantId)
+            }
+        });
+
         res.status(201).json({
-            message: "Maintenance request submitted successfully",
+            message: "Request submitted successfully",
             request
         });
 
     } catch (error) {
         console.error(error);
         res.status(500).json({
-            error: "Failed to create maintenance request"
+            error: "Failed to submit request"
         });
     }
 };
