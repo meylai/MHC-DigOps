@@ -3,19 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - MHC DigiOps</title>
-  <link rel="stylesheet" href="css/style.css">
+    <title>MHC DigiOps Portal</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="login-container">
-    <h2>Login</h2>
-    <form id="loginForm">
-      <input type="email" id="email" placeholder="Email" required />
-      <input type="password" id="password" placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
-    <p id="loginError" class="error"></p>
-  </div>
-  <script src="js/login.js"></script>
+
+    <div class="main-container">
+
+        <!-- LEFT SECTION -->
+        <div class="hero-section">
+            <h1>MHC DigiOps</h1>
+            <p class="subtitle">
+                Smart digital platform for land acquisition, housing maintenance,
+                rent payments, and service request management.
+            </p>
+
+            <div class="features">
+                <h3>Why use this platform?</h3>
+                <ul>
+                    <li>Fast land sale and acquisition processing</li>
+                    <li>Submit maintenance requests instantly</li>
+                    <li>Pay rent online and track payment history</li>
+                    <li>Reduce waiting time and paperwork</li>
+                    <li>Real-time alerts and updates</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- RIGHT SECTION -->
+        <div class="login-container">
+            <h2>Welcome Back</h2>
+
+            <form id="loginForm">
+                <input type="email" id="email" placeholder="Email" required />
+                <input type="password" id="password" placeholder="Password" required />
+
+                <label for="role">Select Role:</label>
+                <select id="role" required>
+                    <option value="">Select Role</option>
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+                <button type="submit">Login</button>
+            </form>
+
+            <p id="loginError" class="error"></p>
+
+            <p class="register-link">
+                Don’t have an account?
+                <a href="register.html">Register here</a>
+            </p>
+        </div>
+
+    </div>
+
+    <script src="js/login.js"></script>
 </body>
 </html>
