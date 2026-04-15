@@ -359,8 +359,8 @@ button:hover {
 
 /* ===== SIDEBAR ===== */
 .user-sidebar {
-    width: 260px;
-    background: #004d40;
+    width: 230px;
+    background: #096424;
     color: white;
     padding: 30px 20px;
     box-shadow: 2px 0 10px rgba(0,0,0,0.1);
@@ -370,7 +370,7 @@ button:hover {
     margin-bottom: 40px;
     font-size: 24px;
     text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
+    border-bottom: 1px solid rgb(239, 241, 239);
     padding-bottom: 15px;
 }
 
@@ -392,7 +392,7 @@ button:hover {
 }
 
 .user-sidebar a:hover {
-    background: #00796b;
+    background: #0e6227;
 }
 
 /* ===== MAIN CONTENT ===== */
@@ -461,7 +461,7 @@ textarea {
 /* ===== BUTTONS ===== */
 button {
     padding: 12px 24px;
-    background: #00796b;
+    background: #085016;
     color: white;
     border: none;
     border-radius: 6px;
@@ -471,13 +471,13 @@ button {
 }
 
 button:hover {
-    background: #004d40;
+    background: #38ca53;
 }
 
 /* ===== SECTION HEADINGS ===== */
 h1, h2 {
     margin-bottom: 20px;
-    color: #004d40;
+    color: #073916;
 }
 
 /* ===== PAYMENT HISTORY BOX ===== */
