@@ -21,10 +21,38 @@
     </div>
 
     <script>
-        function payWith(method) {
+        async function payWith(method) {
             const amount = localStorage.getItem("rentAmount");
 
-            alert(`Processing MWK ${amount} via ${method}`);
+            const response = await fetch(
+                `http://localhost:3000/api/pay-rent`, 
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ 
+                        amount: amount,
+                        email: email,
+                        method: method,
+                        tenantId: tenantId,
+                        houseId: houseId
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (response.ok) {
+                alert("Payment initiated successfully");
+
+                if (data.paymentUrl) {
+                    window.location.href = data.paymentUrl;
+                }
+            } else {
+                alert(`Payment failed: ${data.error}`);
+            }
+
         }
     </script>
 </body>

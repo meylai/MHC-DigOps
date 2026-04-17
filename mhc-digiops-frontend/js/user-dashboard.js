@@ -45,6 +45,10 @@ async function payRent() {
     const amount = 
         document.getElementById("rentAmount").value;
 
+        localStorage.setItem("rentAmount", amount);
+
+        window.location.href = "payment-method.html";
+
     const responce = await fetch(
         "http://localhost:3000/api/payments/rent", 
         {
@@ -54,6 +58,7 @@ async function payRent() {
             },
             body: JSON.stringify({
                 amount: amount,
+                method: method,
                 tenantId: tenantId,
                 houseId: houseId
             })

@@ -9,7 +9,8 @@ import houseRoutes from "./routes/houseRoutes.js";
 import landAcquisitionRoutes from "./routes/landAcquisitionRoutes.js";
 import maintenanceRoutes from "./routes/maintenanceRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
-import malipoPaymentRoutes from "./routes/malipoPaymentRoutes.js";  
+import malipoPaymentRoutes from "./routes/paychanguPaymentRoutes.js";  
+import paychanguPaymentRoutes from "./routes/paychanguPaymentRoutes.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -31,6 +32,7 @@ app.use("/api", applicationRoutes);
 app.use("/api", maintenanceRoutes);
 app.use("/api", paymentRoutes);
 app.use("/api", malipoPaymentRoutes);
+app.use("/api", paychanguPaymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/houses", houseRoutes);
 app.use("/api/land-acquisition", landAcquisitionRoutes);

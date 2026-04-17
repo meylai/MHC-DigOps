@@ -8,8 +8,8 @@ export const createMaintenanceRequest = async (req, res) => {
 
         const request = await prisma.maintenanceRequest.create({
             data: {
-                description,
-                status: "Pending",
+                description: description,
+                status: Status,
                 tenantId: Number(tenantId)
             }
         });
