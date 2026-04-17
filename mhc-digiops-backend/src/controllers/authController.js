@@ -59,19 +59,44 @@ export const login = async (req, res) => {
 
     // generate token
     const token = jwt.sign(
-      { userId: user.id,
-        role: user.role
+      {
+        userId: user.id,
+        role: user.role,
+        email: user.email,
+        name: user.name,
       },
       "SECRET_KEY",
       { expiresIn: "1d" }
     );
-    console.log("USER FROM TOKEN:", req.user); // 🔥 This will be undefined here, but will work in protected routes
 
     res.json({
       message: "Login successful",
       token,
+      email: user.email,
+      name: user.name,
+      role: user.role,
     });
   } catch (error) {
     res.status(500).json({ error: "Login failed" });
+  }
+};
+
+export const profile = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    const user = await prisma.user.findUnique({
+      where: { id: Number(userId) },
+      select: { id: true, name: true, email: true, role: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Unable to retrieve profile" });
   }
 };

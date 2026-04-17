@@ -23,36 +23,39 @@
     <script>
         async function payWith(method) {
             const amount = localStorage.getItem("rentAmount");
+            const email = localStorage.getItem("email");
+            const tenantId = localStorage.getItem("tenantId");
+            const houseId = localStorage.getItem("houseId");
+
+            if (!amount || !email) {
+                alert("Rent amount or email is missing. Please go back to your dashboard and try again.");
+                return;
+            }
 
             const response = await fetch(
-                `http://localhost:3000/api/pay-rent`, 
+                "http://localhost:3000/api/pay-rent",
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ 
-                        amount: amount,
-                        email: email,
-                        method: method,
-                        tenantId: tenantId,
-                        houseId: houseId
+                    body: JSON.stringify({
+                        amount,
+                        email,
+                        method,
+                        tenantId,
+                        houseId
                     })
                 }
             );
 
             const data = await response.json();
 
-            if (response.ok) {
-                alert("Payment initiated successfully");
-
-                if (data.paymentUrl) {
-                    window.location.href = data.paymentUrl;
-                }
+            if (response.ok && data.paymentUrl) {
+                window.location.href = data.paymentUrl;
             } else {
-                alert(`Payment failed: ${data.error}`);
+                alert(`Payment failed: ${data.error || 'Unable to start checkout'}`);
             }
-
         }
     </script>
 </body>

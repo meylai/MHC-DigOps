@@ -56,11 +56,11 @@ if (loginForm) {
 
         if (response.ok) {
             localStorage.setItem("token", data.token);
+            localStorage.setItem("email", data.email);
+            localStorage.setItem("name", data.name);
+            localStorage.setItem("role", data.role);
 
             console.log("TOKEN SAVED:", data.token);
-
-            /*document.getElementById("loginMessage").innerText =
-                "Login successful";*/
 
             window.location.href = "dashboard.html";
         } else {

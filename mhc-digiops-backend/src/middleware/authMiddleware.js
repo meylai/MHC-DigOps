@@ -20,10 +20,12 @@ export const authenticate = (req, res, next) => {
     const decoded = jwt.verify(token, "SECRET_KEY");
     console.log("DECODED TOKEN:", decoded);
 
-    // 3. Attach user to request (🔥 THIS IS WHAT YOU NEED)
+    // 3. Attach user to request
     req.user = {
       userId: decoded.userId,
       role: decoded.role,
+      email: decoded.email,
+      name: decoded.name,
     };
 
     // 4. Continue

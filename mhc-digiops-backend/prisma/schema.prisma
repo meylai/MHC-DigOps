@@ -62,13 +62,18 @@ model Tenant {
 }
 
 model Payment {
-  id        Int    @id @default(autoincrement())
-  amount    Float
-  date      DateTime
-  tenantId  Int
-  tenant    Tenant @relation(fields: [tenantId], references: [id])
-  houseId   Int
-  house     House  @relation(fields: [houseId], references: [id])
+  id         Int      @id @default(autoincrement())
+  amount     Float
+  date       DateTime @default(now())
+  tenantId   Int?
+  tenant     Tenant?  @relation(fields: [tenantId], references: [id])
+  houseId    Int?
+  house      House?   @relation(fields: [houseId], references: [id])
+  email      String?
+  method     String?
+  status     String?
+  reference  String?  @unique
+  externalId String?
 }
 
 

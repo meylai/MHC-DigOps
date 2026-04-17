@@ -1,5 +1,8 @@
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
@@ -9,8 +12,12 @@ import houseRoutes from "./routes/houseRoutes.js";
 import landAcquisitionRoutes from "./routes/landAcquisitionRoutes.js";
 import maintenanceRoutes from "./routes/maintenanceRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
-import malipoPaymentRoutes from "./routes/paychanguPaymentRoutes.js";  
 import paychanguPaymentRoutes from "./routes/paychanguPaymentRoutes.js";
+
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = http.createServer(app);
@@ -25,13 +32,13 @@ const io = new Server(server, {
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "../../mhc-digiops-frontend")));
 app.set("io", io);
 
 app.use("/api", authRoutes);
 app.use("/api", applicationRoutes);
 app.use("/api", maintenanceRoutes);
 app.use("/api", paymentRoutes);
-app.use("/api", malipoPaymentRoutes);
 app.use("/api", paychanguPaymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/houses", houseRoutes);
