@@ -5,9 +5,14 @@ const prisma = new PrismaClient();
 export const createMaintenanceRequest = async (req, res) => {
   try {
     const { description, tenantId } = req.body;
+    const tenantId = req.user.userId;
 
     if (!description) {
       return res.status(400).json({ error: "Description is required" });
+    }
+
+    if (!tenantId) {
+        return res.status(400).json({ error: "Unauthorized: no tenant ID found" });
     }
 
     const request = await prisma.maintenanceRequest.create({
@@ -24,6 +29,7 @@ export const createMaintenanceRequest = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    console.error("Prisma error:", error);
     res.status(500).json({
       error: "Failed to submit request",
     });
