@@ -187,14 +187,55 @@ async function submitMaintenance() {
 
 function payRent() {
     const amount = Number(document.getElementById("rentAmount").value);
+    let email = localStorage.getItem("email");
 
     if (!amount || amount <= 0) {
         alert("Please enter a valid rent amount.");
         return;
     }
 
-    localStorage.setItem("rentAmount", amount.toString());
-    window.location.href = "payment-method.html";
+    if (!email) {
+        const token = localStorage.getItem("token");
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split(".")[1]));
+                email = payload.email;
+            } catch (error) {
+                console.error("Failed to parse token email:", error);
+            }
+        }
+    }
+
+    if (!email) {
+        alert("Unable to determine your email. Please log in again.");
+        window.location.href = "login.html";
+        return;
+    }
+
+    fetch("http://localhost:3000/api/pay-rent", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            amount,
+            email,
+            method: "PayChangu",
+        }),
+    })
+        .then(async (response) => {
+            const data = await response.json();
+            if (response.ok && data.paymentUrl) {
+                window.location.href = data.paymentUrl;
+                return;
+            }
+
+            throw new Error(data.error || "Failed to initiate payment");
+        })
+        .catch((error) => {
+            console.error("Rent payment error:", error);
+            alert(`Payment failed: ${error.message}`);
+        });
 }
 
 function showSuccessMessage() {

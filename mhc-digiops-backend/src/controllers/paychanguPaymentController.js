@@ -42,6 +42,8 @@ async function sendReceiptEmail(to, payment) {
   await transporter.sendMail(mailOptions);
 }
 
+const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
+
 export const initiateRentPayment = async (req, res) => {
   try {
     const { amount, method, tenantId, houseId, email } = req.body;
@@ -58,8 +60,8 @@ export const initiateRentPayment = async (req, res) => {
         amount: Number(amount),
         currency: "MWK",
         email,
-        callback_url: "http://localhost:3000/api/payment-callback",
-        return_url: "http://localhost:3000/user-dashboard.html?payment=success",
+        callback_url: `${backendUrl}/api/payment-callback`,
+        return_url: `${backendUrl}/user-dashboard.html?payment=success`,
         reference,
         description: `Rent payment for ${email}`,
         metadata: {
@@ -76,7 +78,14 @@ export const initiateRentPayment = async (req, res) => {
       }
     );
 
-    const checkoutUrl = response.data.checkout_url || response.data.data?.checkout_url;
+    console.log("PayChangu response:", response.data);
+    const checkoutUrl =
+      response.data.checkout_url ||
+      response.data.data?.checkout_url ||
+      response.data.data?.payment_url ||
+      response.data.data?.url ||
+      response.data.data?.link ||
+      response.data.data?.authorization_url;
 
     const payment = await prisma.payment.create({
       data: {
@@ -159,4 +168,22 @@ export const handlePaymentCallback = async (req, res) => {
     console.error(error);
     res.sendStatus(500);
   }
+};
+
+export const handlePaymentCallbackGet = async (req, res) => {
+  const successRedirect = `${backendUrl}/user-dashboard.html?payment=success`;
+  const txRef = req.query.tx_ref || req.query.reference;
+  const message = txRef
+    ? `Payment process completed. You should be redirected back to your dashboard.`
+    : `Payment callback endpoint reached.`;
+
+  res.send(`
+    <html>
+      <body style="font-family: Arial, sans-serif; padding: 32px; text-align: center;">
+        <h1>Payment callback received</h1>
+        <p>${message}</p>
+        <p><a href="${successRedirect}">Return to dashboard</a></p>
+      </body>
+    </html>
+  `);
 };

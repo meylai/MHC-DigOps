@@ -5,29 +5,37 @@ if (registerForm) {
     registerForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
+        const registerMessage = document.getElementById("message");
+        registerMessage.innerText = "";
+
         const payload = {
             name: document.getElementById("name").value,
             email: document.getElementById("email").value,
             password: document.getElementById("password").value,
             phone: document.getElementById("phone").value,
             gender: document.getElementById("gender").value,
-            role: document.getElementById("role").value
+            role: document.getElementById("role").value,
         };
 
-        const response = await fetch("http://localhost:3000/api/register", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(payload)
-        });
+        try {
+            const response = await fetch("http://localhost:3000/api/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
 
-        const data = await response.json();
+            const data = await response.json();
+            const message = data.message || data.error || "Registration failed";
+            registerMessage.innerText = message;
 
-        document.getElementById("message").innerText = data.message;
-
-        if (response.ok) {
-            window.location.href = "login.html";
+            if (response.ok) {
+                window.location.href = "login.html";
+            }
+        } catch (error) {
+            console.error("Registration error:", error);
+            registerMessage.innerText = "Unable to complete registration. Check your network or backend server.";
         }
     });
 }
