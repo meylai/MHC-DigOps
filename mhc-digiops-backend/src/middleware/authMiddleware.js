@@ -41,7 +41,7 @@ export const authenticate = (req, res, next) => {
 };
 
 export const authorizeAdmin = (req, res, next) => {
-  if (req.user.role !== "ADMIN") {
+  if (String(req.user.role).toUpperCase() !== "ADMIN") {
     return res.status(403).json({ error: "Admin access only" });
   }
   next();

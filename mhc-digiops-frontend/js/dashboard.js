@@ -174,13 +174,19 @@ new Chart(ctx, {
     }
 });
 
+const token = localStorage.getItem("token");
+
 //connection to backend for real data
-fetch("http://localhost:3000/api/admin/dashboard")
+fetch("http://localhost:3000/api/admin/dashboard", {
+    headers: {
+        Authorization: `Bearer ${token}`
+    }
+})
     .then(res => res.json())
     .then(data => {
-        document.getElementById("applicationsCount").textContent = data.applications;
-        document.getElementById("tenantsCount").textContent = data.tenants;
-        document.getElementById("alertsCount").textContent = data.alerts;
+        document.getElementById("applicationsCount").textContent = data.totalApplications;
+        document.getElementById("tenantsCount").textContent = data.totalUsers;
+        document.getElementById("alertsCount").textContent = data.totalNotifications;
     })
     .catch(error => console.error("Dashboard error:", error));
 
@@ -194,7 +200,36 @@ fetch("http://localhost:3000/api/admin/dashboard/stats", {
         console.log(data);
     });
 
-const token = localStorage.getItem("token");
+async function loadMaintenanceRequests() {
+    try {
+        const res = await fetch("http://localhost:3000/api/maintenance/requests", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        const requests = await res.json();
+        const tbody = document.querySelector("#maintenanceRequestsTable tbody");
+        tbody.innerHTML = "";
+
+        if (!Array.isArray(requests) || requests.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4">No maintenance requests</td></tr>';
+            return;
+        }
+
+        requests.forEach(request => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${request.id}</td>
+                <td>${request.tenant?.name || request.tenantId}</td>
+                <td>${request.description}</td>
+                <td>${request.status}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error("Load maintenance requests error:", error);
+    }
+}
 
 async function loadApplications() {
     try {
@@ -248,19 +283,6 @@ async function loadApplications() {
     }
 }
 
-const table = document.querySelector("tbody");
-
-data.forEach(app => {
-    const row = document.createElement("tr");
-
-    row.innerHTML = `
-    <td>${app.location}</td>
-    <td>${app.status}</td>
-  `;
-
-    table.appendChild(row);
-});
-
 const role = localStorage.getItem("role");
 
 if (role !== "admin") {
@@ -286,6 +308,37 @@ async function loadAlerts() {
     });
 }
 
+async function loadMaintenanceRequests() {
+    try {
+        const res = await fetch("http://localhost:3000/api/maintenance/requests", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        const requests = await res.json();
+        const tbody = document.querySelector("#maintenanceRequestsTable tbody");
+        tbody.innerHTML = "";
+
+        if (!Array.isArray(requests) || requests.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4">No maintenance requests</td></tr>';
+            return;
+        }
+
+        requests.forEach(request => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${request.id}</td>
+                <td>${request.tenant?.name || request.tenantId}</td>
+                <td>${request.description}</td>
+                <td>${request.status}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error("Load maintenance requests error:", error);
+    }
+}
+
 //socket.io real-time listener
 const socket = io("http://localhost:3000");
 
@@ -298,3 +351,4 @@ socket.on("newAlert", (alert) => {
 });
 
 loadApplications();
+loadMaintenanceRequests();

@@ -164,25 +164,51 @@ async function loadPaymentHistory() {
 }
 
 async function submitMaintenance() {
-    const describe = document.getElementById("maintenanceText").value;
-    const tenantId = localStorage.getItem("tenantId");
+    const description = document.getElementById("maintenanceText").value.trim();
+    const token = localStorage.getItem("token");
+    let tenantId = localStorage.getItem("tenantId");
 
-    const responce = await fetch(
+    if (!description) {
+        alert("Please describe the issue before submitting.");
+        return;
+    }
+
+    if (!tenantId && token) {
+        try {
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            tenantId = payload.userId;
+        } catch (error) {
+            console.error("Failed to parse token for tenantId:", error);
+        }
+    }
+    
+    console.log("tenantId:", tenantId, "token:", token);
+
+    const response = await fetch(
         "http://localhost:3000/api/maintenance",
         {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({
-                issue: describe,
-                tenantId
-            })
+                description,
+                tenantId,
+            }),
         }
     );
-    const data = await responce.json();
 
-    alert(data.issue);
+    const data = await response.json();
+
+    if (response.ok) {
+        alert(data.message);
+        document.getElementById("maintenanceText").value = "";
+    } else {
+        console.log("Status:", response.status);
+        console.log("Response:", data);
+        alert(data.error || "Failed to submit maintenance request.");
+    }
 }
 
 function payRent() {

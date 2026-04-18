@@ -42,7 +42,26 @@ async function sendReceiptEmail(to, payment) {
   await transporter.sendMail(mailOptions);
 }
 
-const backendUrl = process.env.BACKEND_URL || "http://localhost:3000";
+function normalizeBackendUrl(rawUrl) {
+  if (!rawUrl) {
+    return "http://127.0.0.1:3000";
+  }
+
+  try {
+    const url = new URL(rawUrl);
+    if (!url.port) {
+      url.port = "3000";
+    }
+    if (url.hostname === "localhost") {
+      url.hostname = "127.0.0.1";
+    }
+    return url.toString().replace(/\/$/, "");
+  } catch (error) {
+    return "http://127.0.0.1:3000";
+  }
+}
+
+const backendUrl = normalizeBackendUrl(process.env.BACKEND_URL || "http://127.0.0.1:3000");
 
 export const initiateRentPayment = async (req, res) => {
   try {
@@ -53,6 +72,10 @@ export const initiateRentPayment = async (req, res) => {
     }
 
     const reference = `PAY-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const callbackUrl = `${backendUrl}/api/payment-callback`;
+    const returnUrl = `${backendUrl}/user-dashboard.html?payment=success`;
+
+    console.log("Initiating PayChangu payment", { callbackUrl, returnUrl, reference, email, amount });
 
     const response = await axios.post(
       "https://api.paychangu.com/payment",
@@ -60,8 +83,8 @@ export const initiateRentPayment = async (req, res) => {
         amount: Number(amount),
         currency: "MWK",
         email,
-        callback_url: `${backendUrl}/api/payment-callback`,
-        return_url: `${backendUrl}/user-dashboard.html?payment=success`,
+        callback_url: callbackUrl,
+        return_url: returnUrl,
         reference,
         description: `Rent payment for ${email}`,
         metadata: {
@@ -101,7 +124,11 @@ export const initiateRentPayment = async (req, res) => {
     });
 
     if (!checkoutUrl) {
-      return res.status(500).json({ error: "Unable to get PayChangu checkout URL" });
+      console.error("PayChangu missing checkout URL:", response.data);
+      return res.status(500).json({
+        error: "Unable to get PayChangu checkout URL",
+        details: response.data,
+      });
     }
 
     res.status(200).json({
@@ -110,8 +137,14 @@ export const initiateRentPayment = async (req, res) => {
       payment,
     });
   } catch (error) {
-    console.error(error.response?.data || error.message || error);
-    res.status(500).json({ error: "Failed to initiate payment" });
+    const details = error.response?.data || error.message || error;
+    console.error("PayChangu initiation error:", details);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      "Failed to initiate payment";
+    res.status(500).json({ error: message, details });
   }
 };
 
@@ -173,15 +206,16 @@ export const handlePaymentCallback = async (req, res) => {
 export const handlePaymentCallbackGet = async (req, res) => {
   const successRedirect = `${backendUrl}/user-dashboard.html?payment=success`;
   const txRef = req.query.tx_ref || req.query.reference;
-  const message = txRef
-    ? `Payment process completed. You should be redirected back to your dashboard.`
-    : `Payment callback endpoint reached.`;
+
+  if (txRef) {
+    return res.redirect(successRedirect);
+  }
 
   res.send(`
     <html>
       <body style="font-family: Arial, sans-serif; padding: 32px; text-align: center;">
         <h1>Payment callback received</h1>
-        <p>${message}</p>
+        <p>Payment callback endpoint reached.</p>
         <p><a href="${successRedirect}">Return to dashboard</a></p>
       </body>
     </html>

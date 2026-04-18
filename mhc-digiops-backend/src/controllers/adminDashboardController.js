@@ -6,7 +6,7 @@ export const getAdminDashboard = async (req, res) => {
   try {
     const { role } = req.user;
 
-    if (role !== "ADMIN") {
+    if (String(role).toUpperCase() !== "ADMIN") {
       return res.status(403).json({ error: "Access denied" });
     }
 
