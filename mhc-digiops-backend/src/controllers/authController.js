@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export const register = async (req, res) => {
   console.log("BODY:", req.body);
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, phone, gender } = req.body;
 
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -19,6 +19,8 @@ export const register = async (req, res) => {
         email,
         password: hashedPassword,
         role,
+        phone,
+        gender,
       },
     });
 
@@ -75,6 +77,8 @@ export const login = async (req, res) => {
       email: user.email,
       name: user.name,
       role: user.role,
+      phone: user.phone,
+      gender: user.gender,
     });
   } catch (error) {
     res.status(500).json({ error: "Login failed" });
@@ -87,7 +91,7 @@ export const profile = async (req, res) => {
 
     const user = await prisma.user.findUnique({
       where: { id: Number(userId) },
-      select: { id: true, name: true, email: true, role: true },
+      select: { id: true, name: true, email: true, role: true, phone: true, gender: true },
     });
 
     if (!user) {
@@ -98,5 +102,28 @@ export const profile = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Unable to retrieve profile" });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const { name, email, phone, gender } = req.body;
+
+    const updatedUser = await prisma.user.update({
+      where: { id: Number(userId) },
+      data: {
+        name,
+        email,
+        phone,
+        gender,
+      },
+      select: { id: true, name: true, email: true, role: true, phone: true, gender: true },
+    });
+
+    res.json({ message: "Profile updated", user: updatedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Unable to update profile" });
   }
 };

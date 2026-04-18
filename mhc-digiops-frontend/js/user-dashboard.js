@@ -1,7 +1,12 @@
 const token = localStorage.getItem("token");
+const role = localStorage.getItem("role");
 
 if (!token) {
     window.location.href = "index.html";
+}
+
+if (role !== "user") {
+    window.location.href = "dashboard.html";
 }
 
 function showSection(sectionId) {
@@ -28,6 +33,11 @@ async function loadProfile() {
             },
         });
 
+        if (response.status === 401) {
+            logout();
+            return;
+        }
+
         if (!response.ok) {
             throw new Error("Unable to load profile");
         }
@@ -35,10 +45,79 @@ async function loadProfile() {
         const data = await response.json();
         document.getElementById("profileName").textContent = data.name;
         document.getElementById("profileEmail").textContent = data.email;
+        document.getElementById("profilePhone").textContent = data.phone || "Not set";
+        document.getElementById("profileGender").textContent = data.gender || "Not set";
         localStorage.setItem("email", data.email);
         localStorage.setItem("name", data.name);
+        localStorage.setItem("phone", data.phone || "");
+        localStorage.setItem("gender", data.gender || "");
     } catch (error) {
         console.error("Profile load error:", error);
+        logout();
+    }
+}
+
+function showProfileForm() {
+    document.getElementById("profileEdit").hidden = false;
+    document.getElementById("profileView").hidden = true;
+
+    document.getElementById("profileNameInput").value = document.getElementById("profileName").textContent;
+    document.getElementById("profileEmailInput").value = document.getElementById("profileEmail").textContent;
+    document.getElementById("profilePhoneInput").value = localStorage.getItem("phone") || "";
+    document.getElementById("profileGenderInput").value = localStorage.getItem("gender") || "";
+}
+
+function cancelProfileEdit() {
+    document.getElementById("profileEdit").hidden = true;
+    document.getElementById("profileView").hidden = false;
+}
+
+async function saveProfile() {
+    const name = document.getElementById("profileNameInput").value.trim();
+    const email = document.getElementById("profileEmailInput").value.trim();
+    const phone = document.getElementById("profilePhoneInput").value.trim();
+    const gender = document.getElementById("profileGenderInput").value;
+
+    if (!name || !email) {
+        alert("Please enter both name and email.");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:3000/api/profile", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ name, email, phone, gender }),
+        });
+
+        if (response.status === 401) {
+            logout();
+            return;
+        }
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || "Unable to update profile");
+        }
+
+        const data = await response.json();
+        document.getElementById("profileName").textContent = data.user.name;
+        document.getElementById("profileEmail").textContent = data.user.email;
+        document.getElementById("profilePhone").textContent = data.user.phone || "Not set";
+        document.getElementById("profileGender").textContent = data.user.gender || "Not set";
+        localStorage.setItem("email", data.user.email);
+        localStorage.setItem("name", data.user.name);
+        localStorage.setItem("phone", data.user.phone || "");
+        localStorage.setItem("gender", data.user.gender || "");
+
+        cancelProfileEdit();
+        alert("Profile updated successfully.");
+    } catch (error) {
+        console.error("Profile save error:", error);
+        alert(error.message || "Unable to update profile.");
     }
 }
 
@@ -49,6 +128,11 @@ async function loadPaymentHistory() {
                 Authorization: `Bearer ${token}`,
             },
         });
+
+        if (response.status === 401) {
+            logout();
+            return;
+        }
 
         if (!response.ok) {
             throw new Error("Unable to load payment history");

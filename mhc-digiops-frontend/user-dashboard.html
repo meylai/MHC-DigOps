@@ -53,10 +53,26 @@
                 <!-- USER PROFILE -->
                 <div class="user-profile-card">
                     <h3>User Profile</h3>
-                    <p><strong>Name:</strong> <span id="profileName">John Banda</span></p>
-                    <p><strong>Email:</strong> <span id="profileEmail">john@email.com</span></p>
-                    <p><strong>House:</strong> House A12</p>
-                    <p><strong>Status:</strong> Active Tenant</p>
+                    <div id="profileView">
+                        <p><strong>Name:</strong> <span id="profileName">John Banda</span></p>
+                        <p><strong>Email:</strong> <span id="profileEmail">john@email.com</span></p>
+                        <p><strong>Phone:</strong> <span id="profilePhone">Not set</span></p>
+                        <p><strong>Gender:</strong> <span id="profileGender">Not set</span></p>
+                        <button onclick="showProfileForm()">Edit Profile</button>
+                    </div>
+                    <div id="profileEdit" class="profile-edit-form" hidden>
+                        <input type="text" id="profileNameInput" placeholder="Full Name">
+                        <input type="email" id="profileEmailInput" placeholder="Email">
+                        <input type="text" id="profilePhoneInput" placeholder="Phone Number">
+                        <select id="profileGenderInput">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <button onclick="saveProfile()">Save</button>
+                        <button onclick="cancelProfileEdit()" type="button">Cancel</button>
+                    </div>
                 </div>
 
                 <!-- NOTIFICATIONS -->

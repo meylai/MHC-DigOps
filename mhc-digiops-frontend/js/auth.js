@@ -9,6 +9,8 @@ if (registerForm) {
             name: document.getElementById("name").value,
             email: document.getElementById("email").value,
             password: document.getElementById("password").value,
+            phone: document.getElementById("phone").value,
+            gender: document.getElementById("gender").value,
             role: document.getElementById("role").value
         };
 
@@ -59,10 +61,16 @@ if (loginForm) {
             localStorage.setItem("email", data.email);
             localStorage.setItem("name", data.name);
             localStorage.setItem("role", data.role);
+            localStorage.setItem("phone", data.phone || "");
+            localStorage.setItem("gender", data.gender || "");
 
             console.log("TOKEN SAVED:", data.token);
 
-            window.location.href = "dashboard.html";
+            if (data.role === "admin") {
+                window.location.href = "dashboard.html";
+            } else {
+                window.location.href = "user-dashboard.html";
+            }
         } else {
             document.getElementById("loginMessage").innerText =
                 data.error || "Login failed";
