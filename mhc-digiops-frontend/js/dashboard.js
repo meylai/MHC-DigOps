@@ -233,7 +233,11 @@ async function loadMaintenanceRequests() {
 //load dashboardstats
 async function loadDashboardStats() {
     try {
-        const res = await fetch("http://localhost:3000/api/admin/dashboard/stats"),
+        const res = await fetch("http://localhost:3000/api/admin/dashboard/stats", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
         const data = await res.json();
 
         document.getElementById("totalApplications").textContent = data.totalApplications;
@@ -257,7 +261,7 @@ async function loadApplications() {
             const tr = document.createElement("tr");
 
             tr.innerHTML = `
-        <td>${app.id.name}</td>
+        <td>${app.id}</td>
         <td>${app.location}</td>
         <td>${app.status}</td>
         <td>
@@ -298,15 +302,13 @@ async function loadApplications() {
 
 const role = localStorage.getItem("role");
 
-if (role !== "admin" && role !== "housing_manager") {
+if (role !== "admin") {
     alert("Access denied");
     window.location.href = "index.html";
 }
 
-// Show/hide role-specific UI elements
-if (role === "admin") {
-    document.getElementById("housingManagerActions").style.display = "none";
-}
+// Admin-only UI behavior
+document.getElementById("housingManagerActions").style.display = "none";
 
 async function loadAlerts() {
     const res = await fetch("http://localhost:3000/api/alerts", {
@@ -316,7 +318,8 @@ async function loadAlerts() {
     });
 
     const alerts = await res.json();
-    const list = document.getElementById("alertsList");
+    const list = document.getElementById("alertsContainer");
+    if (!list) return;
     list.innerHTML = "";
 
     alerts.forEach(alert => {
@@ -358,26 +361,6 @@ async function loadMaintenanceRequests() {
     }
 }
 
-//maintenance get route
-export const getAllMaintenanceRequests = async (req, res) => {
-    try {
-        const requests = await prisma.maintenanceRequest.findMany({
-            include: {
-            tenant: true,
-            house: true
-        },
-        orderBy: {
-            createdAt: "desc"
-        }
-    });
-        res.json(requests);
-    } catch (error) {
-        console.error("Get all maintenance requests error:", error);
-        res.status(500).json({ message: "Internal server error" });
-    }
-};
-
-
 //socket.io real-time listener
 const socket = io("http://localhost:3000");
 
@@ -389,9 +372,8 @@ socket.on("newAlert", (alert) => {
     `;
 });
 
-const socket = io("http://localhost:3000");
 socket.on("newRequest", (data) => {
-    alert("New maintenance request recieved: " + data.description);
+    alert("New maintenance request received: " + data.description);
     console.log("New maintenance request:", data);
 });
 
@@ -400,9 +382,13 @@ socket.on("newMaintenanceRequest", (request) => {
     alert(`New maintenance request from ${request.tenant.name} for House ${request.house.name}: ${request.description}`);
 });
 
-loadApplications();
+// Load data based on role
+if (role === "admin") {
+    loadApplications();
+    loadDashboardStats();
+    loadAlerts();
+}
 loadMaintenanceRequests();
-loadDashboardStats();
 loadTenants();
 
 // Tenant Management Functions

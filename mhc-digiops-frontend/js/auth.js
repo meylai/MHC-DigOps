@@ -74,8 +74,10 @@ if (loginForm) {
 
             console.log("TOKEN SAVED:", data.token);
 
-            if (data.role === "admin" || data.role === "housing_manager") {
+            if (data.role === "admin") {
                 window.location.href = "dashboard.html";
+            } else if (data.role === "housing_manager") {
+                window.location.href = "housing-manager-dashboard.html";
             } else {
                 window.location.href = "user-dashboard.html";
             }
