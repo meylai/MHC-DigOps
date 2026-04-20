@@ -230,6 +230,19 @@ async function loadMaintenanceRequests() {
         console.error("Load maintenance requests error:", error);
     }
 }
+//load dashboardstats
+async function loadDashboardStats() {
+    try {
+        const res = await fetch("http://localhost:3000/api/admin/dashboard/stats"),
+        const data = await res.json();
+
+        document.getElementById("totalApplications").textContent = data.totalApplications;
+        document.getElementById("availableHouses").textContent = data.availableHouses;
+        document.getElementById("occupiedHouses").textContent = data.occupiedHouses;
+    } catch (error) {
+        console.error("Load dashboard stats error:", error);
+    }
+}
 
 async function loadApplications() {
     try {
@@ -384,3 +397,5 @@ socket.on("newMaintenanceRequest", (request) => {
 
 loadApplications();
 loadMaintenanceRequests();
+loadDashboardStats();
+loadAlerts();

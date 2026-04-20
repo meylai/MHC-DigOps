@@ -4,17 +4,21 @@ const prisma = new PrismaClient();
 
 export const getAdminDashboardStats = async (req, res) => {
     try {
-        const applications = await prisma.landApplication.count();
-        const tenants = await prisma.tenant.count();
-        const alerts = await prisma.sensorData.count();
-        const houses = await prisma.house.count();
+        const totalApplications = await prisma.application.count();
+        const availableHouses = await prisma.house.count({
+            where: { status: "available" } 
+        });
+        const occupiedHouses = await prisma.house.count({ 
+            where: { status: "occupied" } 
+        });
+        
 
         res.json({
-            applications,
-            tenants,
-            alerts,
-            houses
+            totalApplications,
+            availableHouses,
+            occupiedHouses
         });
+        
     } catch (error) {
         console.error("Admin dashboard stats error:", error);
 

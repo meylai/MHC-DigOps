@@ -41,7 +41,7 @@ document.getElementById("landForm").addEventListener("submit", async (e) => {
     const payload = {
         formType: document.getElementById("formType").value,
         sellerName: document.getElementById("sellerName").value,
-        nationalId: document.getElementById("nationalId").value,
+        nationalId: document.getElementById("idCopy").value,
         region: document.getElementById("region").value,
         landLocation: document.getElementById("landLocation").value,
         landSize: document.getElementById("landSize").value,
@@ -49,9 +49,9 @@ document.getElementById("landForm").addEventListener("submit", async (e) => {
         purpose: document.getElementById("purpose").value,
         landMap: document.getElementById("landMap").value,
 
-        VillageChief: document.getElementById("VillageChief")?.value || "",
+        VillageChief: document.getElementById("villageChief")?.value || "",
         chiefSignature: document.getElementById("chiefSignature")?.value || "",
-        winessName: document.getElementById("witnessName")?.value || "",
+        witnessName: document.getElementById("witnessName")?.value || "",
 
         leaseDuration: document.getElementById("leaseDuration")?.value || "",
         agriculturalPlan: document.getElementById("agriculturalPlan")?.value || "",
@@ -76,7 +76,7 @@ document.getElementById("landForm").addEventListener("submit", async (e) => {
         if (res.ok) {
             alert("Form submitted successfully!");
 
-            form.reset();
+            document.getElementById("landForm").reset();
 
             document.getElementById("customaryFields").classList.add("hidden");
             document.getElementById("leaseFields").classList.add("hidden");
