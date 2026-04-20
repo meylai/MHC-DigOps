@@ -195,6 +195,7 @@ async function submitMaintenance() {
             body: JSON.stringify({
                 description,
                 tenantId,
+                houseId,
             }),
         }
     );

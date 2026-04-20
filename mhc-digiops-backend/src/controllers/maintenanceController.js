@@ -18,10 +18,20 @@ export const createMaintenanceRequest = async (req, res) => {
     const request = await prisma.maintenanceRequest.create({
       data: {
         description,
-        status: "Pending",
+        status: status,
         tenantId: Number(tenantId),
+        houseId: Number(houseId)
       },
     });
+
+    const io = req.app.get("io");
+    io.emit("newMaintenanceRequest", {
+      id: request.id,
+      tenant: request.tenant,
+      house: request.house,
+      description: request.description
+    });
+
 
     res.status(201).json({
       message: "Request submitted successfully",
@@ -30,6 +40,7 @@ export const createMaintenanceRequest = async (req, res) => {
   } catch (error) {
     console.error(error);
     console.error("Prisma error:", error);
+    
     res.status(500).json({
       error: "Failed to submit request",
     });

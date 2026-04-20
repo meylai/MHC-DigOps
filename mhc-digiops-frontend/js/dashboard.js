@@ -310,7 +310,7 @@ async function loadAlerts() {
 
 async function loadMaintenanceRequests() {
     try {
-        const res = await fetch("http://localhost:3000/api/maintenance/requests", {
+        const res = await fetch("http://localhost:3000/api/maintenance", {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -329,6 +329,7 @@ async function loadMaintenanceRequests() {
             row.innerHTML = `
                 <td>${request.id}</td>
                 <td>${request.tenant?.name || request.tenantId}</td>
+                <td>${request.house?.name || request.houseId}</td>
                 <td>${request.description}</td>
                 <td>${request.status}</td>
             `;
@@ -339,6 +340,26 @@ async function loadMaintenanceRequests() {
     }
 }
 
+//maintenance get route
+export const getAllMaintenanceRequests = async (req, res) => {
+    try {
+        const requests = await prisma.maintenanceRequest.findMany({
+            include: {
+            tenant: true,
+            house: true
+        },
+        orderBy: {
+            createdAt: "desc"
+        }
+    });
+        res.json(requests);
+    } catch (error) {
+        console.error("Get all maintenance requests error:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
 //socket.io real-time listener
 const socket = io("http://localhost:3000");
 
@@ -348,6 +369,17 @@ socket.on("newAlert", (alert) => {
     alertsDiv.innerHTML += `
     <p>🚨 ${alert.type} detected at House ${alert.houseId}</p>
     `;
+});
+
+const socket = io("http://localhost:3000");
+socket.on("newRequest", (data) => {
+    alert("New maintenance request recieved: " + data.description);
+    console.log("New maintenance request:", data);
+});
+
+//admin dasboard lister
+socket.on("newMaintenanceRequest", (request) => {
+    alert(`New maintenance request from ${request.tenant.name} for House ${request.house.name}: ${request.description}`);
 });
 
 loadApplications();

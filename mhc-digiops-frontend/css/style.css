@@ -67,7 +67,8 @@ th, td {
 .alerts-section,
 .map-section,
 .applications-section,
-.chart-section {
+.chart-section,
+.maintenance-requests-section {
   background: white;
   padding:20px;
   border-radius: 10px;

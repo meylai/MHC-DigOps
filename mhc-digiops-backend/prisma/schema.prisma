@@ -84,7 +84,10 @@ model MaintenanceRequest {
   description String
   status      String
   tenantId    Int
+  houseId     Int
+  createdAt   DateTime @default(now())
   tenant      Tenant @relation(fields: [tenantId], references: [id])
+  
 }
 
 model Notification {
