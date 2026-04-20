@@ -10,10 +10,10 @@ export const createLandAcquisition = async (req, res) => {
         const acquisition = await prisma.landAcquisition.create({
             data: {
                 ...req.body,
-                nationalId: files.nationalId? files.nationalId[0].path: null,
-                ownershipProof: files.ownershipProof? files.ownershipProof[0].path: null,
-                landMap: files.landMap? files.landMap[0].path: null,
-                valuationReport: files.valuationReport? files.valuationReport[0].path: null
+                nationalId: req.files?.nationalId? req.files.nationalId[0].path: null,
+                ownershipProof: req.files?.ownershipProof? req.files.ownershipProof[0].path: null,
+                landMap: req.files?.landMap? req.files.landMap[0].path: null,
+                valuationReport: req.files?.valuationReport? req.files.valuationReport[0].path: null
             }
         });
 

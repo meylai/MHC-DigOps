@@ -298,9 +298,14 @@ async function loadApplications() {
 
 const role = localStorage.getItem("role");
 
-if (role !== "admin") {
+if (role !== "admin" && role !== "housing_manager") {
     alert("Access denied");
     window.location.href = "index.html";
+}
+
+// Show/hide role-specific UI elements
+if (role === "admin") {
+    document.getElementById("housingManagerActions").style.display = "none";
 }
 
 async function loadAlerts() {
@@ -398,4 +403,178 @@ socket.on("newMaintenanceRequest", (request) => {
 loadApplications();
 loadMaintenanceRequests();
 loadDashboardStats();
+loadTenants();
+
+// Tenant Management Functions
+async function loadTenants() {
+    try {
+        const res = await fetch("http://localhost:3000/api/tenants", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        const tenants = await res.json();
+        const tbody = document.querySelector("#tenantsTable tbody");
+        tbody.innerHTML = "";
+
+        if (!Array.isArray(tenants) || tenants.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5">No tenants found</td></tr>';
+            return;
+        }
+
+        tenants.forEach(tenant => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${tenant.id}</td>
+                <td>${tenant.name}</td>
+                <td>${tenant.house?.address || 'N/A'}</td>
+                <td>${tenant.rentStatus}</td>
+                <td>
+                    ${role === 'housing_manager' ?
+                        `<button onclick="sendRentDueNotification(${tenant.id})">Notify Rent Due</button>
+                         <button onclick="removeTenant(${tenant.id})">Remove</button>` :
+                        `<button onclick="viewTenantDetails(${tenant.id})">View</button>`
+                    }
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error("Load tenants error:", error);
+    }
+}
+
+async function loadAvailableHouses() {
+    try {
+        const res = await fetch("http://localhost:3000/api/houses/map", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        const houses = await res.json();
+        const select = document.getElementById("tenantHouseId");
+        select.innerHTML = '<option value="">Select House</option>';
+
+        // Allow adding tenants to any house (available or occupied)
+        houses.forEach(house => {
+            const option = document.createElement("option");
+            option.value = house.id;
+            option.textContent = `${house.address} (${house.location}) - ${house.status}`;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Load available houses error:", error);
+    }
+}
+
+function showAddTenantForm() {
+    document.getElementById("addTenantForm").style.display = "block";
+    loadAvailableHouses();
+}
+
+function hideAddTenantForm() {
+    document.getElementById("addTenantForm").style.display = "none";
+    document.getElementById("tenantName").value = "";
+    document.getElementById("tenantHouseId").value = "";
+    document.getElementById("tenantRentStatus").value = "pending";
+}
+
+async function addTenant(event) {
+    event.preventDefault();
+
+    const name = document.getElementById("tenantName").value;
+    const houseId = document.getElementById("tenantHouseId").value;
+    const rentStatus = document.getElementById("tenantRentStatus").value;
+
+    try {
+        const res = await fetch("http://localhost:3000/api/tenants", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ name, houseId, rentStatus })
+        });
+
+        if (res.ok) {
+            alert("Tenant added successfully!");
+            hideAddTenantForm();
+            loadTenants();
+            loadDashboardStats(); // Refresh stats
+        } else {
+            const error = await res.json();
+            alert("Error: " + error.error);
+        }
+    } catch (error) {
+        console.error("Add tenant error:", error);
+        alert("Failed to add tenant");
+    }
+}
+
+async function sendRentDueNotification(tenantId) {
+    try {
+        const res = await fetch(`http://localhost:3000/api/tenants/${tenantId}/notify-rent-due`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (res.ok) {
+            alert("Rent due notification sent successfully!");
+        } else {
+            const error = await res.json();
+            alert("Error: " + error.error);
+        }
+    } catch (error) {
+        console.error("Send rent due notification error:", error);
+        alert("Failed to send notification");
+    }
+}
+
+async function viewTenantDetails(tenantId) {
+    try {
+        const res = await fetch(`http://localhost:3000/api/tenants/${tenantId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (res.ok) {
+            const tenant = await res.json();
+            alert(`Tenant Details:\nName: ${tenant.name}\nHouse: ${tenant.house?.address || 'N/A'}\nRent Status: ${tenant.rentStatus}`);
+        } else {
+            const error = await res.json();
+            alert("Error: " + error.error);
+        }
+    } catch (error) {
+        console.error("View tenant details error:", error);
+        alert("Failed to load tenant details");
+    }
+}
+
+async function removeTenant(tenantId) {
+    if (!confirm("Are you sure you want to remove this tenant?")) return;
+
+    try {
+        const res = await fetch(`http://localhost:3000/api/tenants/${tenantId}`, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        if (res.ok) {
+            alert("Tenant removed successfully!");
+            loadTenants();
+            loadDashboardStats(); // Refresh stats
+        } else {
+            const error = await res.json();
+            alert("Error: " + error.error);
+        }
+    } catch (error) {
+        console.error("Remove tenant error:", error);
+        alert("Failed to remove tenant");
+    }
+}
 loadAlerts();

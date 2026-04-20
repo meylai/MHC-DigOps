@@ -69,7 +69,7 @@ document.getElementById("landForm").addEventListener("submit", async (e) => {
     }
 
     //conditional fields
-    formData.append("VillageChief", document.getElementById("villageChief")?.value || "");
+    formData.append("villageChief", document.getElementById("villageChief")?.value || "");
     formData.append("chiefSignature", document.getElementById("chiefSignature")?.value || "");
     formData.append("witnessName", document.getElementById("witnessName")?.value || "");
     formData.append("leaseDuration", document.getElementById("leaseDuration")?.value || "");
@@ -88,7 +88,16 @@ document.getElementById("landForm").addEventListener("submit", async (e) => {
         const data = await res.json();
 
         if (res.ok) {
-            alert("Form submitted successfully!");
+            // Show success message using SweetAlert2
+            Swal.fire({
+                title: "Success!",
+                text: "Form submitted successfully!",
+                icon: "success",
+                confirmButtonText: "OK"
+            }).then(() => {
+                // Reset the form after user clicks "OK"
+                window.location.href = "/user-dashboard.html";
+            }); 
 
             document.getElementById("landForm").reset();
 
@@ -96,6 +105,8 @@ document.getElementById("landForm").addEventListener("submit", async (e) => {
             leaseFields.classList.add("hidden");
             agriculturalFields.classList.add("hidden");
             governmentFields.classList.add("hidden");
+
+            
         } else {
             alert(data.message || "Submission failed");
         }

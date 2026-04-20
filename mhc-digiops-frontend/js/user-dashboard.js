@@ -25,35 +25,101 @@ function logout() {
     window.location.href = "index.html";
 }
 
-async function loadProfile() {
+async function loadTenantProfile() {
     try {
-        const response = await fetch("http://localhost:3000/api/profile", {
+        let tenantId = localStorage.getItem("tenantId");
+
+        if (!tenantId && token) {
+            try {
+                const payload = JSON.parse(atob(token.split(".")[1]));
+                tenantId = payload.userId;
+            } catch (error) {
+                console.error("Failed to parse token for tenantId:", error);
+            }
+        }
+
+        if (!tenantId) {
+            document.getElementById("tenantName").textContent = "Not set";
+            document.getElementById("tenantHouse").textContent = "Not assigned";
+            document.getElementById("tenantRentStatus").textContent = "Unknown";
+            return;
+        }
+
+        const response = await fetch(`http://localhost:3000/api/tenants/${tenantId}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         });
 
-        if (response.status === 401) {
-            logout();
-            return;
+        if (response.ok) {
+            const tenant = await response.json();
+            document.getElementById("tenantName").textContent = tenant.name;
+            document.getElementById("tenantHouse").textContent = tenant.house?.address || "Not assigned";
+            document.getElementById("tenantRentStatus").textContent = tenant.rentStatus;
+        } else {
+            console.error("Failed to load tenant profile");
         }
-
-        if (!response.ok) {
-            throw new Error("Unable to load profile");
-        }
-
-        const data = await response.json();
-        document.getElementById("profileName").textContent = data.name;
-        document.getElementById("profileEmail").textContent = data.email;
-        document.getElementById("profilePhone").textContent = data.phone || "Not set";
-        document.getElementById("profileGender").textContent = data.gender || "Not set";
-        localStorage.setItem("email", data.email);
-        localStorage.setItem("name", data.name);
-        localStorage.setItem("phone", data.phone || "");
-        localStorage.setItem("gender", data.gender || "");
     } catch (error) {
-        console.error("Profile load error:", error);
-        logout();
+        console.error("Tenant profile load error:", error);
+    }
+}
+
+function showTenantProfileForm() {
+    document.getElementById("tenantProfileEdit").hidden = false;
+    document.getElementById("tenantProfileView").hidden = true;
+
+    document.getElementById("tenantNameInput").value = document.getElementById("tenantName").textContent;
+}
+
+function cancelTenantProfileEdit() {
+    document.getElementById("tenantProfileEdit").hidden = true;
+    document.getElementById("tenantProfileView").hidden = false;
+}
+
+async function saveTenantProfile() {
+    const name = document.getElementById("tenantNameInput").value.trim();
+    let tenantId = localStorage.getItem("tenantId");
+
+    if (!name) {
+        alert("Please enter tenant name.");
+        return;
+    }
+
+    if (!tenantId && token) {
+        try {
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            tenantId = payload.userId;
+        } catch (error) {
+            console.error("Failed to parse token for tenantId:", error);
+        }
+    }
+
+    if (!tenantId) {
+        alert("Tenant ID not found. Please contact administrator.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/tenants/${tenantId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ name }),
+        });
+
+        if (response.ok) {
+            alert("Tenant profile updated successfully!");
+            cancelTenantProfileEdit();
+            loadTenantProfile();
+        } else {
+            const error = await response.json();
+            alert("Error: " + error.error);
+        }
+    } catch (error) {
+        console.error("Save tenant profile error:", error);
+        alert("Failed to update tenant profile");
     }
 }
 
@@ -274,5 +340,6 @@ function showSuccessMessage() {
 }
 
 loadProfile();
+loadTenantProfile();
 loadPaymentHistory();
 showSuccessMessage();

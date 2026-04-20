@@ -119,9 +119,9 @@ model LandAcquisition {
   landMap          String
   villageChief     String?
   chiefSignature   String?
-  wtnessName       String?
+  witnessName      String?
   leaseDuration    String?
-  agriculturePlan  String?
+  agriculturalPlan String?
   valuationReport  String?
   ministryApproval String?
   notes            String?

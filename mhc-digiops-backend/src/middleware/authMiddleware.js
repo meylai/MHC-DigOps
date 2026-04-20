@@ -46,3 +46,26 @@ export const authorizeAdmin = (req, res, next) => {
   }
   next();
 };
+
+export const authorizeHousingManager = (req, res, next) => {
+  const userRole = String(req.user.role).toUpperCase();
+  if (userRole !== "ADMIN" && userRole !== "HOUSING_MANAGER") {
+    return res.status(403).json({ error: "Housing manager or admin access only" });
+  }
+  next();
+};
+
+export const authorizeHousingManagerOnly = (req, res, next) => {
+  if (String(req.user.role).toUpperCase() !== "HOUSING_MANAGER") {
+    return res.status(403).json({ error: "Housing manager access only" });
+  }
+  next();
+};
+
+export const authorizeTenantOrHousingManager = (req, res, next) => {
+  const userRole = String(req.user.role).toUpperCase();
+  if (userRole !== "TENANT" && userRole !== "HOUSING_MANAGER" && userRole !== "ADMIN") {
+    return res.status(403).json({ error: "Unauthorized access" });
+  }
+  next();
+};

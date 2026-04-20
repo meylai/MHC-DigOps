@@ -75,6 +75,22 @@
                     </div>
                 </div>
 
+                <!-- TENANT PROFILE -->
+                <div class="tenant-profile-card">
+                    <h3>Tenant Profile</h3>
+                    <div id="tenantProfileView">
+                        <p><strong>Tenant Name:</strong> <span id="tenantName">Not set</span></p>
+                        <p><strong>House Address:</strong> <span id="tenantHouse">Not assigned</span></p>
+                        <p><strong>Rent Status:</strong> <span id="tenantRentStatus">Unknown</span></p>
+                        <button onclick="showTenantProfileForm()">Edit Tenant Info</button>
+                    </div>
+                    <div id="tenantProfileEdit" class="profile-edit-form" hidden>
+                        <input type="text" id="tenantNameInput" placeholder="Tenant Name">
+                        <button onclick="saveTenantProfile()">Save</button>
+                        <button onclick="cancelTenantProfileEdit()" type="button">Cancel</button>
+                    </div>
+                </div>
+
                 <!-- NOTIFICATIONS -->
                 <div class="user-notification-card">
                     <h3>Notifications</h3>

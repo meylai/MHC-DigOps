@@ -13,6 +13,7 @@ import landAcquisitionRoutes from "./routes/landAcquisitionRoutes.js";
 import maintenanceRoutes from "./routes/maintenanceRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import paychanguPaymentRoutes from "./routes/paychanguPaymentRoutes.js";
+import tenantRoutes from "./routes/tenantRoutes.js";
 
 dotenv.config();
 
@@ -44,6 +45,8 @@ app.use("/api", paychanguPaymentRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/houses", houseRoutes);
 app.use("/api/land-acquisition", landAcquisitionRoutes);
+app.use("/api/tenants", tenantRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.get("/", (req, res) => {
   res.send("MHC-DigiOps API Running");

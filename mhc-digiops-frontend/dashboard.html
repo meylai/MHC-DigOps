@@ -26,7 +26,7 @@
 
         <!-- Dashboard Header -->
         <header class="header">
-            <h1>Admin Dashboard</h1>
+            <h1>Management Dashboard</h1>
             <p>Housing Management & Service Delivery Platform</p>
         </header>
 
@@ -90,6 +90,47 @@
                         <th>Tenant</th>
                         <th>Description</th>
                         <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <!-- TENANT MANAGEMENT -->
+        <section class="tenants-section">
+            <h2>Tenant Management</h2>
+            <div class="tenant-actions">
+                <button onclick="loadTenants()">Refresh Tenants</button>
+                <div id="housingManagerActions">
+                    <button onclick="showAddTenantForm()">Add New Tenant</button>
+                </div>
+            </div>
+            <div id="addTenantForm">
+                <h3>Add New Tenant</h3>
+                <form onsubmit="addTenant(event)">
+                    <input type="text" id="tenantName" placeholder="Tenant Name" required>
+                    <label for="tenantHouseId">Tenant House</label>
+                    <select id="tenantHouseId" required>
+                        <option value="">Select House</option>
+                    </select>
+                    <label for="tenantRentStatus">Rent Status</label>
+                    <select id="tenantRentStatus">
+                        <option value="pending">Pending</option>
+                        <option value="paid">Paid</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                    <button type="submit">Add Tenant</button>
+                    <button type="button" onclick="hideAddTenantForm()">Cancel</button>
+                </form>
+            </div>
+            <table id="tenantsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>House</th>
+                        <th>Rent Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
