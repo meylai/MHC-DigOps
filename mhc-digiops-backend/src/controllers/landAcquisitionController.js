@@ -4,8 +4,16 @@ const prisma = new PrismaClient();
 
 export const createLandAcquisition = async (req, res) => {
     try {
+        //extract file paths from multer
+        const files = req.files || {};
         const acquisition = await prisma.landAcquisition.create({
-            data: req.body
+            data: {
+                ...req.body,
+                nationalId: files.nationalId? files.nationalId[0].path: null,
+                ownershipProof: files.ownershipProof? files.ownershipProof[0].path: null,
+                landMap: files.landMap? files.landMap[0].path: null,
+                valuationReport: files.valuationReport? files.valuationReport[0].path: null
+            }
         });
 
         res.status(201).json({

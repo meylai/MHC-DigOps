@@ -38,37 +38,51 @@ formType.addEventListener("change", function () {
 document.getElementById("landForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const payload = {
-        formType: document.getElementById("formType").value,
-        sellerName: document.getElementById("sellerName").value,
-        nationalId: document.getElementById("idCopy").value,
-        region: document.getElementById("region").value,
-        landLocation: document.getElementById("landLocation").value,
-        landSize: document.getElementById("landSize").value,
-        ownershipProof: document.getElementById("ownershipProof").value,
-        purpose: document.getElementById("purpose").value,
-        landMap: document.getElementById("landMap").value,
+    //create a formData object to handle file uploads
+    const formData = new FormData();
 
-        VillageChief: document.getElementById("villageChief")?.value || "",
-        chiefSignature: document.getElementById("chiefSignature")?.value || "",
-        witnessName: document.getElementById("witnessName")?.value || "",
+    //add text filds to formData
+    formData.append("formType", document.getElementById("formType").value);
+    formData.append("sellerName", document.getElementById("sellerName").value);
+    formData.append("region", document.getElementById("region").value);
+    formData.append("landLocation", document.getElementById("landLocation").value);
+    formData.append("landSize", document.getElementById("landSize").value);    
+    formData.append("purpose", document.getElementById("purpose").value);
+    formData.append("notes", document.getElementById("notes").value);
+    
+    
+    // add file fields (use .files[0] to get the actual file object)
+    if (document.getElementById("idCopy").files.length > 0) {
+        formData.append("nationalId", document.getElementById("idCopy").files[0]);
+    }
 
-        leaseDuration: document.getElementById("leaseDuration")?.value || "",
-        agriculturalPlan: document.getElementById("agriculturalPlan")?.value || "",
+    if (document.getElementById("ownershipProof").files.length > 0) {
+        formData.append("ownershipProof", document.getElementById("ownershipProof").files[0]);
+    }
 
-        valuationReport: document.getElementById("valuationReport")?.value || "",
-        ministryApproval: document.getElementById("ministryApproval")?.value || "",
+    if (document.getElementById("landMap").files.length > 0) {
+        formData.append("landMap", document.getElementById("landMap").files[0]);
+    }
 
-        notes: document.getElementById("notes").value
-    };
+    if (document.getElementById("valuationReport").files.length > 0) {
+        formData.append("valuationReport", document.getElementById("valuationReport").files[0]);
+    }
+
+    //conditional fields
+    formData.append("VillageChief", document.getElementById("villageChief")?.value || "");
+    formData.append("chiefSignature", document.getElementById("chiefSignature")?.value || "");
+    formData.append("witnessName", document.getElementById("witnessName")?.value || "");
+    formData.append("leaseDuration", document.getElementById("leaseDuration")?.value || "");
+    formData.append("agriculturalPlan", document.getElementById("agriculturalPlan")?.value || "");   
+    formData.append("ministryApproval", document.getElementById("ministryApproval")?.value || "");
     
     try {
         const res = await fetch("http://localhost:3000/api/land-acquisition", {
             method: "POST",
+            body: formData,
             headers: {
-                "Content-Type": "application/json"
+                Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(payload)
         });
 
         const data = await res.json();
@@ -78,19 +92,20 @@ document.getElementById("landForm").addEventListener("submit", async (e) => {
 
             document.getElementById("landForm").reset();
 
-            document.getElementById("customaryFields").classList.add("hidden");
-            document.getElementById("leaseFields").classList.add("hidden");
-            document.getElementById("agriculturalFields").classList.add("hidden");
-            document.getElementById("governmentFields").classList.add("hidden");
+            customaryFields.classList.add("hidden");
+            leaseFields.classList.add("hidden");
+            agriculturalFields.classList.add("hidden");
+            governmentFields.classList.add("hidden");
         } else {
             alert(data.message || "Submission failed");
         }
+
+        document.getElementById("message").innerText =
+            data.message || "Submitted successfully";
 
     } catch (error) {
         console.error(error);
         alert("Server error. Please try again.");
     }
 
-    document.getElementById("message").innerText =
-        data.message || "Submitted successfully";
 });
