@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 export const createMaintenanceRequest = async (req, res) => {
   try {
     const { description, tenantId } = req.body;
-    const tenantId = req.user.userId;
+    //const tenantId = req.user.userId;
 
     if (!description) {
       return res.status(400).json({ error: "Description is required" });

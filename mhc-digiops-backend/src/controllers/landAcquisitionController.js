@@ -6,6 +6,7 @@ export const createLandAcquisition = async (req, res) => {
     try {
         //extract file paths from multer
         const files = req.files || {};
+        console.log("Files:", req.files);
         const acquisition = await prisma.landAcquisition.create({
             data: {
                 ...req.body,

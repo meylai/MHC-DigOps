@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
 import { createLandAcquisition } from "../controllers/landAcquisitionController.js";
+import { validateLandAcquisition } from "../middleware/validateLandAcquisition.js";
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-//route with file handling
+//route with file handling + validation
 router.post(
     "/",
     upload.fields([
@@ -24,6 +25,7 @@ router.post(
         { name: "valuationReport", maxCount: 1 }
 
     ]),
+    validateLandAcquisition,
     createLandAcquisition
 );
 
