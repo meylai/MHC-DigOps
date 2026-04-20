@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Houses - MHC DigiOps</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    
+</head>
+
+<body>
+    <div class="houses-container">
+        <a href="dashboard.html" class="back-link">← Back to Dashboard</a>
+
+        <div class="houses-header">
+            <h1>Our Properties</h1>
+            <p>Explore all available and occupied houses across our network</p>
+        </div>
+
+        <div class="map-section">
+            <div id="housesMap"></div>
+        </div>
+
+        <div class="legend-section">
+            <div class="legend-item">
+                <div class="legend-color occupied"></div>
+                <span>Occupied (Blue)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color available"></div>
+                <span>Available (Green)</span>
+            </div>
+        </div>
+
+        <div class="houses-list-section">
+            <!-- Lilongwe Section -->
+            <div class="city-section">
+                <h2>Lilongwe Properties</h2>
+            </div>
+            <div id="lilongweHouses"></div>
+
+            <!-- Blantyre Section -->
+            <div class="city-section">
+                <h2>Blantyre Properties</h2>
+            </div>
+            <div id="blantyreHouses"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="js/houses.js"></script>
+</body>
+
+</html>
