@@ -64,6 +64,72 @@ async function loadTenantProfile() {
     }
 }
 
+async function loadProfile() {
+    try {
+        const response = await fetch("http://localhost:3000/api/profile", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (response.status === 401) {
+            logout();
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error("Unable to load profile");
+        }
+
+        const user = await response.json();
+        document.getElementById("profileName").textContent = user.name;
+        document.getElementById("profileEmail").textContent = user.email;
+        document.getElementById("profilePhone").textContent = user.phone || "Not set";
+        document.getElementById("profileGender").textContent = user.gender || "Not set";
+
+        // Store in localStorage for edit form
+        localStorage.setItem("name", user.name);
+        localStorage.setItem("email", user.email);
+        localStorage.setItem("phone", user.phone || "");
+        localStorage.setItem("gender", user.gender || "");
+    } catch (error) {
+        console.error("Profile load error:", error);
+    }
+}
+
+async function loadNotifications() {
+    try {
+        const response = await fetch("http://localhost:3000/api/notifications", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (response.status === 401) {
+            logout();
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error("Unable to load notifications");
+        }
+
+        const user = await response.json();
+        document.getElementById("profileName").textContent = user.name;
+        document.getElementById("profileEmail").textContent = user.email;
+        document.getElementById("profilePhone").textContent = user.phone || "Not set";
+        document.getElementById("profileGender").textContent = user.gender || "Not set";
+
+        // Store in localStorage for edit form
+        localStorage.setItem("name", user.name);
+        localStorage.setItem("email", user.email);
+        localStorage.setItem("phone", user.phone || "");
+        localStorage.setItem("gender", user.gender || "");
+    } catch (error) {
+        console.error("Profile load error:", error);
+    }
+}
+
 function showTenantProfileForm() {
     document.getElementById("tenantProfileEdit").hidden = false;
     document.getElementById("tenantProfileView").hidden = true;
@@ -342,4 +408,5 @@ function showSuccessMessage() {
 loadProfile();
 loadTenantProfile();
 loadPaymentHistory();
+loadNotifications();
 showSuccessMessage();

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
@@ -89,12 +90,26 @@
                 <tbody></tbody>
             </table>
         </section>
+
+        <section class="notifications-section">
+            <h2>Send Notifications</h2>
+            <form onsubmit="sendNotification(event)">
+                <label for="notificationUserId">Select User</label>
+                <select id="notificationUserId" required>
+                    <option value="">Select User</option>
+                </select>
+                <textarea id="notificationMessage" placeholder="Enter notification message" required></textarea>
+                <button type="submit">Send Notification</button>
+            </form>
+        </section>
     </div>
 
     <div id="map-script-container">
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     </div>
     <script src="js/housing-manager-dashboard.js"></script>
+    <script src="js/leaflet.js"></script>
+    <script src="js/chart.js"></script>
 </body>
 
 </html>

@@ -28,3 +28,22 @@ export const getAdminDashboard = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch dashboard data" });
   }
 };
+
+export const getUsers = async (req, res) => {
+  try {
+    const { role } = req.user;
+
+    if (String(role).toUpperCase() !== "ADMIN" && String(role).toUpperCase() !== "HOUSING_MANAGER") {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const users = await prisma.user.findMany({
+      select: { id: true, name: true, email: true, role: true },
+    });
+
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+};

@@ -282,5 +282,62 @@ async function removeTenant(tenantId) {
     }
 }
 
+async function loadUsers() {
+    try {
+        const res = await fetch("http://localhost:3000/api/admin/users", {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const users = await res.json();
+        const select = document.getElementById("notificationUserId");
+        select.innerHTML = '<option value="">Select User</option>';
+
+        users.forEach(user => {
+            const option = document.createElement("option");
+            option.value = user.id;
+            option.textContent = `${user.name} (${user.email})`;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Load users error:", error);
+    }
+}
+
+async function sendNotification(event) {
+    event.preventDefault();
+
+    const userId = document.getElementById("notificationUserId").value;
+    const message = document.getElementById("notificationMessage").value.trim();
+
+    if (!userId || !message) {
+        alert("Please select a user and enter a message.");
+        return;
+    }
+
+    try {
+        const res = await fetch("http://localhost:3000/api/notifications", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ userId: Number(userId), message })
+        });
+
+        if (res.ok) {
+            alert("Notification sent successfully!");
+            document.getElementById("notificationMessage").value = "";
+            document.getElementById("notificationUserId").value = "";
+        } else {
+            const error = await res.json();
+            alert("Error: " + error.error);
+        }
+    } catch (error) {
+        console.error("Send notification error:", error);
+        alert("Failed to send notification");
+    }
+}
+
 loadMaintenanceRequests();
 loadTenants();
+loadUsers();
+loadUsers();
