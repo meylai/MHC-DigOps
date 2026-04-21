@@ -295,6 +295,86 @@ async function loadPaymentHistory() {
     }
 }
 
+async function loadRecentActivity() {
+    try {
+        const [maintenanceRes, paymentRes, applicationRes] = await Promise.all([
+            fetch("http://localhost:3000/api/maintenance/user", {
+                headers: { Authorization: `Bearer ${token}` },
+            }),
+            fetch("http://localhost:3000/api/payments/history", {
+                headers: { Authorization: `Bearer ${token}` },
+            }),
+            fetch("http://localhost:3000/api/applications", {
+                headers: { Authorization: `Bearer ${token}` },
+            }),
+        ]);
+
+        if (maintenanceRes.status === 401 || paymentRes.status === 401 || applicationRes.status === 401) {
+            logout();
+            return;
+        }
+
+        const maintenance = maintenanceRes.ok ? await maintenanceRes.json() : [];
+        const payments = paymentRes.ok ? await paymentRes.json() : [];
+        const applications = applicationRes.ok ? await applicationRes.json() : [];
+
+        const activities = [];
+
+        // Add maintenance requests
+        maintenance.forEach(req => {
+            activities.push({
+                date: new Date(req.createdAt),
+                activity: "Maintenance Request",
+                status: req.status,
+            });
+        });
+
+        // Add payments
+        payments.forEach(payment => {
+            activities.push({
+                date: new Date(payment.date),
+                activity: "Rent Payment",
+                status: payment.status || "Completed",
+            });
+        });
+
+        // Add land applications
+        applications.forEach(app => {
+            activities.push({
+                date: new Date(app.createdAt || Date.now()), // Assuming createdAt exists
+                activity: "Land Application",
+                status: app.status,
+            });
+        });
+
+        // Sort by date descending
+        activities.sort((a, b) => b.date - a.date);
+
+        // Take recent 10
+        const recentActivities = activities.slice(0, 10);
+
+        const tbody = document.getElementById("user-activityTable");
+        tbody.innerHTML = "";
+
+        if (recentActivities.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3">No recent activity</td></tr>';
+            return;
+        }
+
+        recentActivities.forEach(activity => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${activity.date.toLocaleDateString()}</td>
+                <td>${activity.activity}</td>
+                <td>${activity.status}</td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error("Recent activity error:", error);
+    }
+}
+
 async function submitMaintenance() {
     const description = document.getElementById("maintenanceText").value.trim();
     const token = localStorage.getItem("token");
@@ -409,4 +489,5 @@ loadProfile();
 loadTenantProfile();
 loadPaymentHistory();
 loadNotifications();
+loadRecentActivity();
 showSuccessMessage();

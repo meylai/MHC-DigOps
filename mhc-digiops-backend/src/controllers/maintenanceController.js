@@ -64,3 +64,29 @@ export const getMaintenanceRequests = async (req, res) => {
     res.status(500).json({ error: "Unable to fetch maintenance requests" });
   }
 };
+
+export const getUserMaintenanceRequests = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    // Find tenant for this user
+    const tenant = await prisma.tenant.findFirst({
+      where: { id: Number(userId) }, // Assuming userId is tenantId for simplicity
+    });
+
+    if (!tenant) {
+      return res.json([]);
+    }
+
+    const requests = await prisma.maintenanceRequest.findMany({
+      where: { tenantId: tenant.id },
+      orderBy: { createdAt: "desc" },
+      take: 10, // Recent 10
+    });
+
+    res.json(requests);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Unable to fetch maintenance requests" });
+  }
+};

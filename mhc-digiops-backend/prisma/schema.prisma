@@ -24,11 +24,12 @@ model User {
 }
 
 model LandApplication {
-  id        Int    @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   location  String
   status    String
+  createdAt DateTime @default(now())
   userId    Int
-  user      User   @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
   approval  Approval?
 }
 
