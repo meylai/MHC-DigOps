@@ -98,7 +98,18 @@ export const profile = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.json(user);
+    let tenantId = null;
+    if (user.role.toLowerCase() === 'tenant') {
+      const tenant = await prisma.tenant.findFirst({
+        where: { name: user.name },
+        select: { id: true }
+      });
+      if (tenant) {
+        tenantId = tenant.id;
+      }
+    }
+
+    res.json({ ...user, tenantId });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Unable to retrieve profile" });

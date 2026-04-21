@@ -21,6 +21,7 @@ model User {
   gender          String?
   notifications   Notification []
   landApplications LandApplication []
+  tenant          Tenant?
 }
 
 model LandApplication {
@@ -58,6 +59,8 @@ model Tenant {
   id         Int    @id @default(autoincrement())
   name       String
   rentStatus String
+  userId     Int    @unique
+  user       User   @relation(fields: [userId], references: [id])
   houseId    Int
   house      House  @relation(fields: [houseId], references: [id])
   payments   Payment []

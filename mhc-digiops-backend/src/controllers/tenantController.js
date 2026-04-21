@@ -23,6 +23,8 @@ export const getAllTenants = async (req, res) => {
 export const getTenantById = async (req, res) => {
   try {
     const { id } = req.params;
+    const userRole = String(req.user.role).toUpperCase();
+
     const tenant = await prisma.tenant.findUnique({
       where: { id: Number(id) },
       include: {
@@ -36,6 +38,15 @@ export const getTenantById = async (req, res) => {
       return res.status(404).json({ error: "Tenant not found" });
     }
 
+    // Check ownership for tenants
+    if (userRole === "TENANT") {
+      if (tenant.userId && req.user.userId !== tenant.userId) {
+        return res.status(403).json({ error: "You can only view your own information" });
+      } else if (!tenant.userId && tenant.name !== req.user.name) {
+        return res.status(403).json({ error: "You can only view your own information" });
+      }
+    }
+
     res.json(tenant);
   } catch (error) {
     console.error("Get tenant error:", error);
@@ -46,10 +57,10 @@ export const getTenantById = async (req, res) => {
 // Create new tenant
 export const createTenant = async (req, res) => {
   try {
-    const { name, houseId, rentStatus } = req.body;
+    const { name, houseId, userId, rentStatus } = req.body;
 
-    if (!name || !houseId) {
-      return res.status(400).json({ error: "Name and houseId are required" });
+    if (!name || !houseId || !userId) {
+      return res.status(400).json({ error: "Name, houseId, and userId are required" });
     }
 
     // Check if house exists
@@ -61,10 +72,20 @@ export const createTenant = async (req, res) => {
       return res.status(404).json({ error: "House not found" });
     }
 
+    // Check if user exists and is a tenant
+    const user = await prisma.user.findUnique({
+      where: { id: Number(userId) }
+    });
+
+    if (!user || user.role.toLowerCase() !== 'tenant') {
+      return res.status(400).json({ error: "Invalid user or user is not a tenant" });
+    }
+
     const tenant = await prisma.tenant.create({
       data: {
         name,
         houseId: Number(houseId),
+        userId: Number(userId),
         rentStatus: rentStatus || "pending"
       },
       include: {
@@ -86,6 +107,9 @@ export const createTenant = async (req, res) => {
     });
   } catch (error) {
     console.error("Create tenant error:", error);
+    if (error.code === "P2002") {
+      return res.status(400).json({ error: "User already has a tenant record" });
+    }
     res.status(500).json({ error: "Failed to create tenant" });
   }
 };

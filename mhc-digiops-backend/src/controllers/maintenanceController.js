@@ -15,20 +15,30 @@ export const createMaintenanceRequest = async (req, res) => {
         return res.status(400).json({ error: "Unauthorized: no tenant ID found" });
     }
 
+    // Get tenant to find houseId
+    const tenant = await prisma.tenant.findUnique({
+      where: { id: Number(tenantId) },
+      include: { house: true }
+    });
+
+    if (!tenant) {
+      return res.status(404).json({ error: "Tenant not found" });
+    }
+
     const request = await prisma.maintenanceRequest.create({
       data: {
         description,
-        status: status,
+        status: "pending",
         tenantId: Number(tenantId),
-        houseId: Number(houseId)
+        houseId: tenant.houseId
       },
     });
 
     const io = req.app.get("io");
     io.emit("newMaintenanceRequest", {
       id: request.id,
-      tenant: request.tenant,
-      house: request.house,
+      tenant: tenant,
+      house: tenant.house,
       description: request.description
     });
 

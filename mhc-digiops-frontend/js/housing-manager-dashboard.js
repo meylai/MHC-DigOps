@@ -205,7 +205,7 @@ function hideAddTenantForm() {
     document.getElementById("addTenantForm").style.display = "none";
     document.getElementById("tenantName").value = "";
     document.getElementById("tenantHouseId").value = "";
-    document.getElementById("tenantRentStatus").value = "pending";
+    document.getElementById("tenantRentStatus").value = "";
 }
 
 async function addTenant(event) {

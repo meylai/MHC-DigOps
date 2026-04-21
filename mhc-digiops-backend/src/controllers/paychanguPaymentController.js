@@ -72,8 +72,8 @@ export const initiateRentPayment = async (req, res) => {
     }
 
     const reference = `PAY-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const callbackUrl = `${backendUrl}/api/payment-callback`;
-    const returnUrl = `${backendUrl}/user-dashboard.html?payment=success`;
+    const callbackUrl = `http://127.0.0.1:3000/api/payment-callback`;
+    const returnUrl = `http://localhost:4992/user-dashboard.html?payment=success`;
 
     console.log("Initiating PayChangu payment", { callbackUrl, returnUrl, reference, email, amount });
 

@@ -6,7 +6,7 @@ if (!token) {
 }
 
 if (role !== "user") {
-    window.location.href = "dashboard.html";
+    window.location.href = "user-dashboard.html";
 }
 
 function showSection(sectionId) {
@@ -92,6 +92,9 @@ async function loadProfile() {
         localStorage.setItem("email", user.email);
         localStorage.setItem("phone", user.phone || "");
         localStorage.setItem("gender", user.gender || "");
+        if (user.tenantId) {
+            localStorage.setItem("tenantId", user.tenantId);
+        }
     } catch (error) {
         console.error("Profile load error:", error);
     }
@@ -407,7 +410,6 @@ async function submitMaintenance() {
             body: JSON.stringify({
                 description,
                 tenantId,
-                houseId,
             }),
         }
     );
@@ -464,16 +466,33 @@ function payRent() {
     })
         .then(async (response) => {
             const data = await response.json();
+            console.log("Payment response:", response.status, data); // Debug log
+
             if (response.ok && data.paymentUrl) {
                 window.location.href = data.paymentUrl;
                 return;
             }
 
-            throw new Error(data.error || "Failed to initiate payment");
+            // Handle different error formats
+            let errorMessage = "Failed to initiate payment";
+            if (data.error) {
+                if (typeof data.error === "string") {
+                    errorMessage = data.error;
+                } else if (data.error.message) {
+                    errorMessage = data.error.message;
+                } else if (typeof data.error === "object") {
+                    // If error is an object, try to stringify it or extract useful info
+                    errorMessage = data.error.details || data.error.toString() || "Unknown error occurred";
+                }
+            } else if (data.message) {
+                errorMessage = data.message;
+            }
+
+            throw new Error(errorMessage);
         })
         .catch((error) => {
             console.error("Rent payment error:", error);
-            alert(`Payment failed: ${error.message}`);
+            alert("Payment failed:" + (error.message || JSON.stringify(error)));
         });
 }
 

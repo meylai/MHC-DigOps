@@ -15,10 +15,10 @@ const router = express.Router();
 // All tenant routes require authentication
 router.use(authenticate);
 
-// Read operations - Admin and Housing Manager can view
+// Read operations - Admin and Housing Manager can view all, Tenants can view their own
 router.get("/", authorizeHousingManager, getAllTenants);
 router.get("/previous", authorizeHousingManager, getPreviousTenants);
-router.get("/:id", authorizeHousingManager, getTenantById);
+router.get("/:id", authorizeTenantOrHousingManager, getTenantById);
 
 // Write operations - Housing Manager only
 router.post("/", authorizeHousingManagerOnly, createTenant);
