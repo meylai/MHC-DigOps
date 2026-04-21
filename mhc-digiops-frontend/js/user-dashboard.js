@@ -482,6 +482,54 @@ function showSuccessMessage() {
     if (params.get("payment") === "success") {
         alert("Your rent payment was successful. A receipt has been sent to your email.");
         history.replaceState(null, "", window.location.pathname);
+        loadPaymentHistory(); // Refresh payment history after successful payment
+    }
+}
+
+async function loadOverviewStats() {
+    try {
+        const token = localStorage.getItem("token");
+        
+        // Fetch land applications count
+        const applicationsRes = await fetch("http://localhost:3000/api/applications", {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        const applications = applicationsRes.ok ? await applicationsRes.json() : [];
+        document.getElementById("applicationsCount").textContent = applications.length || 0;
+
+        // Fetch maintenance requests count
+        const maintenanceRes = await fetch("http://localhost:3000/api/maintenance/user", {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        const maintenance = maintenanceRes.ok ? await maintenanceRes.json() : [];
+        document.getElementById("maintenanceCount").textContent = maintenance.length || 0;
+
+        // Fetch payment history for rent status
+        const paymentsRes = await fetch("http://localhost:3000/api/payments/history", {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        const payments = paymentsRes.ok ? await paymentsRes.json() : [];
+
+        const rentStatusEl = document.getElementById("rentStatus");
+        const rentPaymentDateEl = document.getElementById("rentPaymentDate");
+
+        if (payments && payments.length > 0) {
+            // Sort by date descending to get the latest payment
+            const sortedPayments = payments.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const lastPayment = sortedPayments[0];
+            
+            rentStatusEl.textContent = "Paid";
+            rentStatusEl.classList.remove("unpaid");
+            rentStatusEl.classList.add("paid");
+            rentPaymentDateEl.textContent = `Last payment: ${new Date(lastPayment.date).toLocaleDateString()}`;
+        } else {
+            rentStatusEl.textContent = "Rent has not been paid";
+            rentStatusEl.classList.remove("paid");
+            rentStatusEl.classList.add("unpaid");
+            rentPaymentDateEl.textContent = "";
+        }
+    } catch (error) {
+        console.error("Overview stats load error:", error);
     }
 }
 
@@ -490,4 +538,5 @@ loadTenantProfile();
 loadPaymentHistory();
 loadNotifications();
 loadRecentActivity();
+loadOverviewStats();
 showSuccessMessage();

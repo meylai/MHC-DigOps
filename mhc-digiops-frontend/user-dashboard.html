@@ -43,7 +43,10 @@
 
                     <div class="user-card">
                         <h3>Rent Status</h3>
-                        <p>Paid</p>
+                        <div id="rentStatusContainer">
+                            <p id="rentStatus" class="rent-status-text">Loading...</p>
+                            <p id="rentPaymentDate" class="rent-payment-date"></p>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -75,21 +78,7 @@
                     </div>
                 </div>
 
-                <!-- TENANT PROFILE -->
-                <div class="tenant-profile-card">
-                    <h3>Tenant Profile</h3>
-                    <div id="tenantProfileView">
-                        <p><strong>Tenant Name:</strong> <span id="tenantName">Not set</span></p>
-                        <p><strong>House Address:</strong> <span id="tenantHouse">Not assigned</span></p>
-                        <p><strong>Rent Status:</strong> <span id="tenantRentStatus">Unknown</span></p>
-                        <button onclick="showTenantProfileForm()">Edit Tenant Info</button>
-                    </div>
-                    <div id="tenantProfileEdit" class="profile-edit-form" hidden>
-                        <input type="text" id="tenantNameInput" placeholder="Tenant Name">
-                        <button onclick="saveTenantProfile()">Save</button>
-                        <button onclick="cancelTenantProfileEdit()" type="button">Cancel</button>
-                    </div>
-                </div>
+                
 
                 <!-- NOTIFICATIONS -->
                 <div class="user-notification-card">
@@ -115,27 +104,6 @@
                     <tbody id="user-activityTable">
                         <tr>
                             <td colspan="3">Loading...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- PAYMENT HISTORY -->
-            <div class="user-activity-section">
-                <h3>Payment History</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Method</th>
-                        </tr>
-                    </thead>
-                    <tbody id="paymentTable">
-                        <tr>
-                            <td>10/04/2026</td>
-                            <td>MWK 50,000</td>
-                            <td>Mpamba</td>
                         </tr>
                     </tbody>
                 </table>
