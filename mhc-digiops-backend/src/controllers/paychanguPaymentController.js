@@ -71,6 +71,10 @@ export const initiateRentPayment = async (req, res) => {
       return res.status(400).json({ error: "Amount and email are required" });
     }
 
+    if (!process.env.PAYCHANGU_SECRET_KEY) {
+      return res.status(500).json({ error: "Payment configuration: PAYCHANGU_SECRET_KEY" });
+    }
+
     const reference = `PAY-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const callbackUrl = `http://127.0.0.1:3000/api/payment-callback`;
     const returnUrl = `http://localhost:4992/user-dashboard.html?payment=success`;
@@ -102,13 +106,15 @@ export const initiateRentPayment = async (req, res) => {
     );
 
     console.log("PayChangu response:", response.data);
-    const checkoutUrl =
+    /*const checkoutUrl =
       response.data.checkout_url ||
       response.data.data?.checkout_url ||
       response.data.data?.payment_url ||
       response.data.data?.url ||
       response.data.data?.link ||
-      response.data.data?.authorization_url;
+      response.data.data?.authorization_url;*/
+
+    const checkoutUrl = response.data?.data?.checkout_url || response.data?.checkout_url;
 
     const payment = await prisma.payment.create({
       data: {

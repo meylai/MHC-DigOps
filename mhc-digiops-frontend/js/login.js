@@ -21,11 +21,17 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
         localStorage.setItem("role", data.role);
         localStorage.setItem("phone", data.phone || "");
         localStorage.setItem("gender", data.gender || "");
+        if (data.tenantId) {
+            localStorage.setItem("tenantId", data.tenantId);
+        }
 
-        if (data.role === "admin") {
+        const userRole = (data.role || selectedRole).toLowerCase();
+        if (userRole === "admin") {
           window.location.href = "dashboard.html";
-        } else if (data.role === "housing_manager") {
+        } else if (userRole === "housing_manager" || userRole === "housing manager") {
           window.location.href = "housing-manager-dashboard.html";
+        } else if (userRole === "tenant") {
+          window.location.href = "user-dashboard.html";
         } else {
           window.location.href = "user-dashboard.html";
         }

@@ -71,6 +71,17 @@ export const login = async (req, res) => {
       { expiresIn: "1d" }
     );
 
+    let tenantId = null;
+    if (user.role.toLowerCase() === 'tenant') {
+      const tenant = await prisma.tenant.findFirst({
+        where: { userId: user.id },
+        select: { id: true }
+      });
+      if (tenant) {
+        tenantId = tenant.id;
+      }
+    }
+
     res.json({
       message: "Login successful",
       token,
@@ -79,6 +90,7 @@ export const login = async (req, res) => {
       role: user.role,
       phone: user.phone,
       gender: user.gender,
+      tenantId,
     });
   } catch (error) {
     res.status(500).json({ error: "Login failed" });
@@ -101,7 +113,7 @@ export const profile = async (req, res) => {
     let tenantId = null;
     if (user.role.toLowerCase() === 'tenant') {
       const tenant = await prisma.tenant.findFirst({
-        where: { name: user.name },
+        where: { userId: user.id }, // Link tenant to user via userId for uniqueness
         select: { id: true }
       });
       if (tenant) {

@@ -120,6 +120,7 @@ async function loadMaintenanceRequests() {
         });
         const requests = await res.json();
         const tbody = document.querySelector("#maintenanceRequestsTable tbody");
+        if (!tbody) return;
         tbody.innerHTML = "";
 
         if (!Array.isArray(requests) || requests.length === 0) {
@@ -176,6 +177,28 @@ async function loadTenants() {
     }
 }
 
+async function loadTenantUsers() {
+    try {
+        const res = await fetch("http://localhost:3000/api/admin/users", {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const users = await res.json();
+        const select = document.getElementById("tenantUserId");
+        if (!select) return;
+        select.innerHTML = '<option value="">Select User Account</option>';
+
+        // Filter for users with the 'tenant' role
+        users.filter(u => u.role.toLowerCase() === 'tenant').forEach(user => {
+            const option = document.createElement("option");
+            option.value = user.id;
+            option.textContent = `${user.name} (${user.email})`;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Load tenant users error:", error);
+    }
+}
+
 async function loadAvailableHouses() {
     try {
         const res = await fetch("http://localhost:3000/api/houses/map", {
@@ -183,6 +206,7 @@ async function loadAvailableHouses() {
         });
         const houses = await res.json();
         const select = document.getElementById("tenantHouseId");
+        if (!select) return;
         select.innerHTML = '<option value="">Select House</option>';
 
         houses.forEach(house => {
@@ -199,6 +223,7 @@ async function loadAvailableHouses() {
 function showAddTenantForm() {
     document.getElementById("addTenantForm").style.display = "block";
     loadAvailableHouses();
+    loadTenantUsers(); // Populate users dropdown too
 }
 
 function hideAddTenantForm() {
@@ -206,6 +231,9 @@ function hideAddTenantForm() {
     document.getElementById("tenantName").value = "";
     document.getElementById("tenantHouseId").value = "";
     document.getElementById("tenantRentStatus").value = "";
+    if (document.getElementById("tenantUserId")) {
+        document.getElementById("tenantUserId").value = "";
+    }
 }
 
 async function addTenant(event) {
@@ -213,7 +241,13 @@ async function addTenant(event) {
 
     const name = document.getElementById("tenantName").value;
     const houseId = document.getElementById("tenantHouseId").value;
+    const userId = document.getElementById("tenantUserId")?.value;
     const rentStatus = document.getElementById("tenantRentStatus").value;
+
+    if (!userId) {
+        alert("Please select a user account to assign this tenant to.");
+        return;
+    }
 
     try {
         const res = await fetch("http://localhost:3000/api/tenants", {
@@ -222,7 +256,7 @@ async function addTenant(event) {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`
             },
-            body: JSON.stringify({ name, houseId, rentStatus })
+            body: JSON.stringify({ name, houseId, userId, rentStatus })
         });
 
         if (res.ok) {
@@ -339,5 +373,4 @@ async function sendNotification(event) {
 
 loadMaintenanceRequests();
 loadTenants();
-loadUsers();
 loadUsers();

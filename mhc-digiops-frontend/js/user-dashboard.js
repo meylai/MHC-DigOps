@@ -5,8 +5,9 @@ if (!token) {
     window.location.href = "index.html";
 }
 
-if (role !== "user") {
-    window.location.href = "user-dashboard.html";
+if (!role || role.toLowerCase() !== "tenant") { 
+    alert("Access denied. This dashboard is for tenants only.");
+    window.location.href = "index.html";
 }
 
 function showSection(sectionId) {
@@ -28,15 +29,10 @@ function logout() {
 async function loadTenantProfile() {
     try {
         let tenantId = localStorage.getItem("tenantId");
-
-        if (!tenantId && token) {
-            try {
-                const payload = JSON.parse(atob(token.split(".")[1]));
-                tenantId = payload.userId;
-            } catch (error) {
-                console.error("Failed to parse token for tenantId:", error);
-            }
-        }
+        // The tenantId should be explicitly set by the profile endpoint if the user is a tenant.
+        // Do not fall back to userId from token, as that is the user's ID, not the tenant record ID.
+        // If tenantId is not in localStorage, it means the user is not associated with a tenant record,
+        // or the profile endpoint failed to retrieve it.
 
         if (!tenantId) {
             document.getElementById("tenantName").textContent = "Not set";
@@ -56,6 +52,9 @@ async function loadTenantProfile() {
             document.getElementById("tenantName").textContent = tenant.name;
             document.getElementById("tenantHouse").textContent = tenant.house?.address || "Not assigned";
             document.getElementById("tenantRentStatus").textContent = tenant.rentStatus;
+            if (tenant.houseId) {
+                localStorage.setItem("houseId", tenant.houseId);
+            }
         } else {
             console.error("Failed to load tenant profile");
         }
@@ -117,19 +116,16 @@ async function loadNotifications() {
             throw new Error("Unable to load notifications");
         }
 
-        const user = await response.json();
-        document.getElementById("profileName").textContent = user.name;
-        document.getElementById("profileEmail").textContent = user.email;
-        document.getElementById("profilePhone").textContent = user.phone || "Not set";
-        document.getElementById("profileGender").textContent = user.gender || "Not set";
-
-        // Store in localStorage for edit form
-        localStorage.setItem("name", user.name);
-        localStorage.setItem("email", user.email);
-        localStorage.setItem("phone", user.phone || "");
-        localStorage.setItem("gender", user.gender || "");
+        const notifications = await response.json();
+        const list = document.getElementById("notificationsList");
+        list.innerHTML = notifications.length ? "" : "<li>No new notifications</li>";
+        notifications.forEach(n => {
+            const li = document.createElement("li");
+            li.textContent = n.message || n.text;
+            list.appendChild(li);
+        });
     } catch (error) {
-        console.error("Profile load error:", error);
+        console.error("Notifications load error:", error);
     }
 }
 
@@ -152,15 +148,6 @@ async function saveTenantProfile() {
     if (!name) {
         alert("Please enter tenant name.");
         return;
-    }
-
-    if (!tenantId && token) {
-        try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            tenantId = payload.userId;
-        } catch (error) {
-            console.error("Failed to parse token for tenantId:", error);
-        }
     }
 
     if (!tenantId) {
@@ -257,6 +244,12 @@ async function saveProfile() {
 }
 
 async function loadPaymentHistory() {
+    const tbody = document.getElementById("paymentTable");
+    if (!tbody) {
+        console.error("Error: Element with ID 'paymentTable' not found in the DOM.");
+        return;
+    }
+
     try {
         const response = await fetch("http://localhost:3000/api/payments/history", {
             headers: {
@@ -274,15 +267,12 @@ async function loadPaymentHistory() {
         }
 
         const payments = await response.json();
-        const tbody = document.getElementById("paymentTable");
         tbody.innerHTML = "";
 
         if (payments.length === 0) {
-            document.getElementById("user-paymentHistory").textContent = "No payments yet";
+            tbody.innerHTML = '<tr><td colspan="3">No payments yet</td></tr>';
             return;
         }
-
-        document.getElementById("user-paymentHistory").textContent = "";
 
         payments.forEach(payment => {
             const row = document.createElement("tr");
@@ -381,20 +371,19 @@ async function loadRecentActivity() {
 async function submitMaintenance() {
     const description = document.getElementById("maintenanceText").value.trim();
     const token = localStorage.getItem("token");
-    let tenantId = localStorage.getItem("tenantId");
+    const tenantId = localStorage.getItem("tenantId"); // Retrieve tenantId from localStorage
 
     if (!description) {
         alert("Please describe the issue before submitting.");
         return;
     }
 
-    if (!tenantId && token) {
-        try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            tenantId = payload.userId;
-        } catch (error) {
-            console.error("Failed to parse token for tenantId:", error);
-        }
+    // If tenantId is not available, the user is not recognized as a tenant.
+    // Prevent submission of maintenance request.
+    if (!tenantId) {
+        alert("You are not associated with a tenant profile. Cannot submit maintenance request.");
+        console.error("Attempted to submit maintenance request without a tenantId.");
+        return;
     }
     
     console.log("tenantId:", tenantId, "token:", token);
@@ -429,12 +418,15 @@ async function submitMaintenance() {
 function payRent() {
     const amount = Number(document.getElementById("rentAmount").value);
     let email = localStorage.getItem("email");
+    const tenantId = localStorage.getItem("tenantId");
+    const houseId = localStorage.getItem("houseId");
 
     if (!amount || amount <= 0) {
         alert("Please enter a valid rent amount.");
         return;
     }
 
+    // Fallback email retrieval from token if missing from localStorage
     if (!email) {
         const token = localStorage.getItem("token");
         if (token) {
@@ -461,6 +453,8 @@ function payRent() {
         body: JSON.stringify({
             amount,
             email,
+            tenantId: tenantId ? Number(tenantId) : null,
+            houseId: houseId ? Number(houseId) : null,
             method: "PayChangu",
         }),
     })

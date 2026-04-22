@@ -62,6 +62,10 @@
                 <h3>Add New Tenant</h3>
                 <form onsubmit="addTenant(event)">
                     <input type="text" id="tenantName" placeholder="Tenant Name" required>
+                    <label for="tenantUserId">User Account</label>
+                    <select id="tenantUserId" required>
+                        <option value="">Select User Account</option>
+                    </select>
                     <label for="tenantHouseId">Tenant House</label>
                     <select id="tenantHouseId" required>
                         <option value="">Select House</option>
@@ -107,8 +111,6 @@
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     </div>
     <script src="js/housing-manager-dashboard.js"></script>
-    <script src="js/leaflet.js"></script>
-    <script src="js/chart.js"></script>
 </body>
 
 </html>

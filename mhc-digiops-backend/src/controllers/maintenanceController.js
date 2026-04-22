@@ -81,7 +81,7 @@ export const getUserMaintenanceRequests = async (req, res) => {
 
     // Find tenant for this user
     const tenant = await prisma.tenant.findFirst({
-      where: { id: Number(userId) }, // Assuming userId is tenantId for simplicity
+      where: { userId: Number(userId) },
     });
 
     if (!tenant) {
