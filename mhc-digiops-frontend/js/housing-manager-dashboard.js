@@ -1,32 +1,32 @@
+
 let currentHouseId = null;
 const token = localStorage.getItem("token");
 const role = localStorage.getItem("role");
 
-// Make role check more flexible
+// Role check
 if (!role || (role.toLowerCase() !== "housing_manager" && role.toLowerCase() !== "housing manager")) {
     alert("Access denied");
     window.location.href = "index.html";
 }
 
-const map = L.map("map").setView([-13.9626, 33.7741], 6);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "&copy; OpenStreetMap contributors"
-}).addTo(map);
+// Load houses from houses.js
+
+const housesData = typeof window.availableHouses !== 'undefined' ? window.availableHouses : [];
+
+
+const map = L.map("map").setView([-14.75, 33.90], 8);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
 
 fetch("http://localhost:3000/api/houses/map")
     .then(response => response.json())
-    .then(houses => {
-        houses.forEach(house => {
-            const marker = L.marker([house.latitude, house.longitude])
-                .addTo(map)
+    .then(data => {
+        data.forEach(house => {
+            const marker = L.marker([house.latitude, house.longitude]).addTo(map)
                 .bindPopup(`<b>${house.address}</b>`);
-
-            marker.on("click", () => {
-                loadHouseDetails(house.id);
-            });
+            marker.on("click", () => loadHouseDetails(house.id));
         });
     })
-    .catch(error => console.error("House map error:", error));
+    .catch(error => console.error("Map error:", error));
 
 function loadHouseDetails(houseId) {
     currentHouseId = houseId;
@@ -35,394 +35,127 @@ function loadHouseDetails(houseId) {
     })
         .then(res => res.json())
         .then(data => {
-            const detailsDiv = document.getElementById("houseDetails");
-            detailsDiv.innerHTML = `
+            document.getElementById("houseDetails").innerHTML = `
                 <p><strong>Address:</strong> ${data.address}</p>
                 <p><strong>Status:</strong> ${data.status}</p>
                 <p><strong>Tenant:</strong> ${data.tenants?.[0]?.name || "N/A"}</p>
                 <p><strong>Rent Status:</strong> ${data.tenants?.[0]?.rentStatus || "N/A"}</p>
-                <p><strong>Alerts History:</strong></p>
-                <ul>
-                    ${data.sensorData?.map(alert => `
-                        <li>${alert.type} - ${new Date(alert.timestamp).toLocaleString()}</li>
-                    `).join("") || "<li>No alerts</li>"}
-                </ul>
-                <p><strong>Payments:</strong> ${data.payments?.length || 0}</p>
-                <p><strong>Maintenance Requests:</strong></p>
-                <ul>
-                    ${data.maintenanceRequests?.length > 0
-                    ? data.maintenanceRequests.map(request => `
-                        <li>
-                            ${request.description} - ${request.status}
-                            <button onclick="approveMaintenance(${request.id})">Approve</button>
-                        </li>
-                    `).join("")
-                    : "<li>No maintenance requests</li>"
-                }
-                </ul>
-                <hr>
-                <h4>House Actions</h4>
                 <button onclick="markRentPaid(${data.tenants?.[0]?.id || 0})">Mark Rent Paid</button>
-                <button onclick="escalateVandalism(${houseId})">Escalate Vandalism</button>
             `;
-        })
-        .catch(error => console.error("Details error:", error));
+        });
 }
 
-function approveMaintenance(requestId) {
-    fetch(`http://localhost:3000/api/maintenance/${requestId}/approve`, {
+function markRentPaid(id) {
+    fetch(`http://localhost:3000/api/payments/${id}/pay`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${token}` }
-    })
-        .then(res => res.json())
-        .then(() => {
-            alert("Maintenance request approved!");
-            loadHouseDetails(currentHouseId);
-            loadMaintenanceRequests();
-        })
-        .catch(error => console.error("Maintenance approval error:", error));
-}
-
-function markRentPaid(tenantId) {
-    if (!tenantId) {
-        alert("No tenant selected for rent payment.");
-        return;
-    }
-
-    fetch(`http://localhost:3000/api/payments/${tenantId}/pay`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` }
-    })
-        .then(res => res.json())
-        .then(() => {
-            alert("Rent updated!");
-            loadHouseDetails(currentHouseId);
-        })
-        .catch(error => console.error("Payment error:", error));
-}
-
-function escalateVandalism(houseId) {
-    fetch(`http://localhost:3000/api/alerts/${houseId}/escalate`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` }
-    })
-        .then(res => res.json())
-        .then(() => {
-            alert("Vandalism escalated!");
-            loadHouseDetails(currentHouseId);
-        })
-        .catch(error => console.error("Alert error:", error));
+    }).then(() => loadHouseDetails(currentHouseId));
 }
 
 async function loadMaintenanceRequests() {
-    try {
-        const res = await fetch("http://localhost:3000/api/maintenance/requests", {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        const requests = await res.json();
-        const tbody = document.querySelector("#maintenanceRequestsTable tbody");
-        if (!tbody) return;
-        tbody.innerHTML = "";
-
-        if (!Array.isArray(requests) || requests.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5">No maintenance requests</td></tr>';
-            return;
-        }
-
-        requests.forEach(request => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${request.id}</td>
-                <td>${request.tenant?.name || request.tenantId}</td>
-                <td>${request.house?.address || request.houseId}</td>
-                <td>${request.description}</td>
-                <td>${request.status}</td>
-            `;
-            tbody.appendChild(row);
-        });
-    } catch (error) {
-        console.error("Load maintenance requests error:", error);
-    }
+    const res = await fetch("http://localhost:3000/api/maintenance/requests", {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    const requests = await res.json();
+    const tbody = document.querySelector("#maintenanceRequestsTable tbody");
+    tbody.innerHTML = requests.map(r => `<tr><td>${r.id}</td><td>${r.tenant?.name}</td><td>${r.house?.address}</td><td>${r.description}</td><td>${r.status}</td></tr>`).join('') || '<tr><td colspan="5">No requests</td></tr>';
 }
 
 async function loadTenants() {
-    try {
-        const res = await fetch("http://localhost:3000/api/tenants", {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        const tenants = await res.json();
-        const tbody = document.querySelector("#tenantsTable tbody");
-        tbody.innerHTML = "";
-
-        if (!Array.isArray(tenants) || tenants.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5">No tenants found</td></tr>';
-            return;
-        }
-
-        tenants.forEach(tenant => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td>${tenant.id}</td>
-                <td>${tenant.name}</td>
-                <td>${tenant.house?.address || 'N/A'}</td>
-                <td>${tenant.rentStatus}</td>
-                <td>
-                    <button onclick="sendRentDueNotification(${tenant.id})">Notify Rent Due</button>
-                    <button onclick="removeTenant(${tenant.id})">Remove</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    } catch (error) {
-        console.error("Load tenants error:", error);
-    }
+    const res = await fetch("http://localhost:3000/api/tenants", {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    const tenants = await res.json();
+    const tbody = document.querySelector("#tenantsTable tbody");
+    tbody.innerHTML = tenants.map(t => `<tr><td>${t.id}</td><td>${t.name}</td><td>${t.house?.address}</td><td>${t.rentStatus}</td><td><button onclick="removeTenant(${t.id})">Remove</button></td></tr>`).join('') || '<tr><td colspan="5">No tenants</td></tr>';
 }
 
 async function loadTenantUsers() {
-    try {
-        const res = await fetch("http://localhost:3000/api/admin/users", {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        
-        const users = await res.json();
-        const select = document.getElementById("tenantUserId");
-        if (!select) {
-            console.error("tenantUserId select element not found");
-            return;
-        }
-        
-        select.innerHTML = '<option value="">Select User Account</option>';
-
-// Show all users except managers/admins - backend validates tenant role
-        const tenantUsers = users.filter(u => u.role && !['housing_manager', 'admin'].includes(u.role.toLowerCase()));
-        
-        if (tenantUsers.length === 0) {
-            select.innerHTML = '<option value="">No available users - register users first</option>';
-            console.log('No potential tenant users found');
-            return;
-        }
-        console.log(`Loaded ${tenantUsers.length} users for tenant dropdown`);
-        
-        tenantUsers.forEach(user => {
-            const option = document.createElement("option");
-            option.value = user.id;
-            option.textContent = `${user.name} (${user.email})`;
-            select.appendChild(option);
-        });
-    } catch (error) {
-        console.error("Load tenant users error:", error);
-        const select = document.getElementById("tenantUserId");
-        if (select) {
-            select.innerHTML = '<option value="">Error loading users</option>';
-        }
-    }
+    console.log('Loading tenant users from API...');
+    const res = await fetch("http://localhost:3000/api/admin/users", {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    const users = await res.json();
+    const tenantUsers = users.filter(u => u.role && u.role.toLowerCase() === 'tenant');
+    const select = document.getElementById("tenantUserId");
+    select.innerHTML = '<option value="">Select User Account</option>';
+    tenantUsers.forEach(u => {
+        const option = document.createElement("option");
+        option.value = u.id;
+        option.text = `${u.name} (${u.email})`;
+        select.appendChild(option);
+    });
+    console.log(`Loaded ${tenantUsers.length} tenant users`);
 }
 
-async function loadAvailableHouses() {
-    try {
-        console.log('Loading available houses from API...');
-        const res = await fetch("http://localhost:3000/api/houses/available", {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-
-// Backend has /available endpoint, no fallback needed
-        // Removed fallback since getAvailableHouses() implemented
-        
-        const houses = await res.json();
-        const select = document.getElementById("tenantHouseId");
-        if (!select) return;
-
-        if (houses.length === 0) {
-            select.innerHTML = '<option value="">No available houses found</option>';
-            console.log('No available houses');
-            return;
-        }
-        console.log(`Loaded ${houses.length} available houses`);
-        
-        select.innerHTML = '<option value="">Select House</option>';
-        houses.forEach(house => {
-            const option = document.createElement("option");
-            option.value = house.id;
-            option.textContent = `${house.address} (${house.location}) - ${house.status}`;
-            select.appendChild(option);
-        });
-    } catch (error) {
-        console.error("Load available houses error:", error);
-        const select = document.getElementById("tenantHouseId");
-        if (select) {
-            select.innerHTML = '<option value="">Error loading houses</option>';
-        }
-    }
+function loadAvailableHouses() {
+    console.log('Loading houses from houses-data.js');
+    const availableHouses = housesData;
+    const select = document.getElementById("tenantHouseId");
+    select.innerHTML = '<option value="">Select House</option>';
+    availableHouses.forEach(h => {
+        const option = document.createElement("option");
+        option.value = JSON.stringify(h);
+        option.text = `${h.name} - ${h.address}`;
+        select.appendChild(option);
+    });
+    console.log(`Loaded ${availableHouses.length} houses from static data`);
 }
 
 function showAddTenantForm() {
-    console.log("Showing add tenant form");
-    const form = document.getElementById("addTenantForm");
-    if (form) {
-        // Clear and load dropdowns
-        document.getElementById("tenantUserId").innerHTML = '<option value="">Loading users...</option>';
-        document.getElementById("tenantHouseId").innerHTML = '<option value="">Loading houses...</option>';
-        form.style.display = "block";
-        console.log("Add tenant form displayed, loading dropdowns");
-        Promise.all([loadTenantUsers(), loadAvailableHouses()]).then(() => {
-            console.log('Dropdowns populated');
-        });
-        
-    }else {
-        console.error("Add tenant form element not found");
-    }
-    
+    console.log("showAddTenantForm - Button clicked");
+    document.getElementById("addTenantForm").style.display = "block";
+    loadTenantUsers();
+    loadAvailableHouses();
 }
 
 function hideAddTenantForm() {
     document.getElementById("addTenantForm").style.display = "none";
-    document.getElementById("tenantName").value = "";
-    document.getElementById("tenantHouseId").value = "";
-    document.getElementById("tenantRentStatus").value = "";
-    if (document.getElementById("tenantUserId")) {
-        document.getElementById("tenantUserId").value = "";
-    }
+    document.querySelectorAll("#addTenantForm input, #addTenantForm select").forEach(el => el.value = '');
 }
 
-async function addTenant(event) {
-    event.preventDefault();
-
-    const name = document.getElementById("tenantName").value;
-    const houseId = document.getElementById("tenantHouseId").value;
-    const userId = document.getElementById("tenantUserId")?.value;
-    const rentStatus = document.getElementById("tenantRentStatus").value;
-
-    if (!userId) {
-        alert("Please select a user account to assign this tenant to.");
+async function addTenant(e) {
+    e.preventDefault();
+    const houseSelectValue = document.getElementById("tenantHouseId").value;
+    let houseData;
+    try {
+        houseData = JSON.parse(houseSelectValue);
+    } catch {
+        alert("Invalid house selected");
         return;
     }
-
-    try {
-        const res = await fetch("http://localhost:3000/api/tenants", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({ name, houseId, userId, rentStatus })
-        });
-
-        if (res.ok) {
-            alert("Tenant added successfully!");
-            hideAddTenantForm();
-            loadTenants();
-            loadMaintenanceRequests();
-        } else {
-            const error = await res.json();
-            alert("Error: " + error.error);
-        }
-    } catch (error) {
-        console.error("Add tenant error:", error);
-        alert("Failed to add tenant");
+    const formData = {
+        name: document.getElementById("tenantName").value,
+        house: houseData,
+        userId: parseInt(document.getElementById("tenantUserId").value),
+        rentStatus: document.getElementById("tenantRentStatus").value
+    };
+    const res = await fetch("http://localhost:3000/api/tenants", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(formData)
+    });
+    if (res.ok) {
+        alert("Tenant added!");
+        hideAddTenantForm();
+        loadTenants();
+    } else {
+        const err = await res.json();
+        alert(err.error || "Error adding tenant");
     }
 }
 
-async function sendRentDueNotification(tenantId) {
-    try {
-        const res = await fetch(`http://localhost:3000/api/tenants/${tenantId}/notify-rent-due`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (res.ok) {
-            alert("Rent due notification sent successfully!");
-        } else {
-            const error = await res.json();
-            alert("Error: " + error.error);
-        }
-    } catch (error) {
-        console.error("Send rent due notification error:", error);
-        alert("Failed to send notification");
-    }
-}
-
-async function removeTenant(tenantId) {
-    if (!confirm("Are you sure you want to remove this tenant?")) return;
-
-    try {
-        const res = await fetch(`http://localhost:3000/api/tenants/${tenantId}`, {
+function removeTenant(id) {
+    if (confirm("Remove tenant?")) {
+        fetch(`http://localhost:3000/api/tenants/${id}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (res.ok) {
-            alert("Tenant removed successfully!");
-            loadTenants();
-            loadMaintenanceRequests();
-        } else {
-            const error = await res.json();
-            alert("Error: " + error.error);
-        }
-    } catch (error) {
-        console.error("Remove tenant error:", error);
-        alert("Failed to remove tenant");
+        }).then(() => loadTenants());
     }
 }
 
-async function loadUsers() {
-    try {
-        const res = await fetch("http://localhost:3000/api/admin/users", {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        const users = await res.json();
-        const select = document.getElementById("notificationUserId");
-        select.innerHTML = '<option value="">Select User</option>';
-
-        users.forEach(user => {
-            const option = document.createElement("option");
-            option.value = user.id;
-            option.textContent = `${user.name} (${user.email})`;
-            select.appendChild(option);
-        });
-    } catch (error) {
-        console.error("Load users error:", error);
-    }
-}
-
-async function sendNotification(event) {
-    event.preventDefault();
-
-    const userId = document.getElementById("notificationUserId").value;
-    const message = document.getElementById("notificationMessage").value.trim();
-
-    if (!userId || !message) {
-        alert("Please select a user and enter a message.");
-        return;
-    }
-
-    try {
-        const res = await fetch("http://localhost:3000/api/notifications", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({ userId: Number(userId), message })
-        });
-
-        if (res.ok) {
-            alert("Notification sent successfully!");
-            document.getElementById("notificationMessage").value = "";
-            document.getElementById("notificationUserId").value = "";
-        } else {
-            const error = await res.json();
-            alert("Error: " + error.error);
-        }
-    } catch (error) {
-        console.error("Send notification error:", error);
-        alert("Failed to send notification");
-    }
-}
-
+// Init
 loadMaintenanceRequests();
 loadTenants();
-loadUsers();
+console.log("Housing Manager Dashboard loaded - housesData:", housesData.length);
+

@@ -8,6 +8,6 @@ const router = express.Router();
 router.get("/", getHousesForMap);
 router.get("/map", getHousesForMap);
 router.get("/:id/details", authenticateToken, getHouseDetails);
-router.get("/houses/available", authenticateToken, getAvailableHouses);
+router.get("/available", authenticateToken, getAvailableHouses);
 
 export default router;

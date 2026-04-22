@@ -59,17 +59,45 @@ export const createTenant = async (req, res) => {
   try {
     const { name, houseId, userId, rentStatus } = req.body;
 
-    if (!name || !houseId || !userId) {
-      return res.status(400).json({ error: "Name, houseId, and userId are required" });
+    if (!name || !userId) {
+      return res.status(400).json({ error: "Name and userId are required" });
     }
 
-    // Check if house exists
-    const house = await prisma.house.findUnique({
-      where: { id: Number(houseId) }
-    });
+    let houseIdNum = Number(houseId);
+    let house;
 
-    if (!house) {
-      return res.status(404).json({ error: "House not found" });
+    // Handle house object from frontend (static data)
+    const houseObj = req.body.house;
+    if (houseObj && houseObj.address) {
+      // Find existing house by address or create new
+      house = await prisma.house.findFirst({
+        where: { address: houseObj.address }
+      });
+      if (!house) {
+        house = await prisma.house.create({
+          data: {
+            address: houseObj.address,
+            location: houseObj.location || 'Lilongwe',
+            status: houseObj.status || 'available',
+            latitude: -13.96, // Default Lilongwe
+            longitude: 33.77,
+            tenantId: null,
+            paymentId: null
+          }
+        });
+        console.log('Created new house:', house.id);
+      }
+      houseIdNum = house.id;
+    } else if (houseId) {
+      // Fallback to ID lookup
+      house = await prisma.house.findUnique({
+        where: { id: houseIdNum }
+      });
+      if (!house) {
+        return res.status(400).json({ error: "House not found" });
+      }
+    } else {
+      return res.status(400).json({ error: "House info required" });
     }
 
     // Check if user exists and is a tenant
@@ -84,7 +112,7 @@ export const createTenant = async (req, res) => {
     const tenant = await prisma.tenant.create({
       data: {
         name,
-        houseId: Number(houseId),
+        houseId: houseIdNum,
         userId: Number(userId),
         rentStatus: rentStatus || "pending"
       },
@@ -93,10 +121,10 @@ export const createTenant = async (req, res) => {
       }
     });
 
-    // Update house status to occupied if it was available
-    if (house.status === "available") {
+    // Update house status to occupied if it was available (using returned tenant.house)
+    if (tenant.house.status === "available") {
       await prisma.house.update({
-        where: { id: Number(houseId) },
+        where: { id: houseIdNum },
         data: { status: "occupied" }
       });
     }

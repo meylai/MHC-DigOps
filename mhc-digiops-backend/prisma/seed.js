@@ -72,17 +72,8 @@ async function main() {
   const tenants = await prisma.tenant.createMany({ data: tenantData });
   console.log(`Created ${tenants.count} tenants`);
 
-  // Sample payments
-  const payments = [];
-  for (let i = 0; i < 5; i++) {
-    payments.push({
-      amount: 50000 + Math.random() * 50000,
-      tenantId: tenantUserIds[i % 10] || 1,
-      method: 'PayChangu',
-      status: 'completed'
-    });
-  }
-  await prisma.payment.createMany({ data: payments });
+  // Sample payments (skip - paymentId/House.paymentId relation issue)
+  console.log('Skipped payments - focus on tenants/houses');
 
   // Sample maintenance
   const maintenance = [];
