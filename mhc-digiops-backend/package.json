@@ -9,7 +9,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:db:push": "prisma db push",
     "prisma:studio": "prisma studio",
-    "dev": "nodemon"
+"db:seed": "node --loader ts-node/esm prisma/seed.js",
+    "dev": "nodemon src/app.js"
   },
   "keywords": [],
   "author": "",

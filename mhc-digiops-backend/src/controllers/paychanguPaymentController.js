@@ -72,12 +72,17 @@ export const initiateRentPayment = async (req, res) => {
     }
 
     if (!process.env.PAYCHANGU_SECRET_KEY) {
-      return res.status(500).json({ error: "Payment configuration: PAYCHANGU_SECRET_KEY" });
+      return res.status(422).json({ error: "Payment service temporarily unavailable. Please try again later." });
     }
 
+    let origin = req.headers.origin || 'http://localhost:3000';
+    if (req.headers.host) {
+      origin = `http://${req.headers.host}`;
+    }
+    const baseBackendUrl = origin.replace(/:4992(:\d+)?$/, ':3000').replace(/^http:\/\//, 'http://');
     const reference = `PAY-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const callbackUrl = `http://127.0.0.1:3000/api/payment-callback`;
-    const returnUrl = `http://localhost:4992/user-dashboard.html?payment=success`;
+    const callbackUrl = `${baseBackendUrl}/api/payment-callback`;
+    const returnUrl = new URL('/user-dashboard.html?payment=success', origin).toString();
 
     console.log("Initiating PayChangu payment", { callbackUrl, returnUrl, reference, email, amount });
 
@@ -105,16 +110,15 @@ export const initiateRentPayment = async (req, res) => {
       }
     );
 
-    console.log("PayChangu response:", response.data);
-    /*const checkoutUrl =
-      response.data.checkout_url ||
-      response.data.data?.checkout_url ||
-      response.data.data?.payment_url ||
-      response.data.data?.url ||
-      response.data.data?.link ||
-      response.data.data?.authorization_url;*/
+    console.log("Full PayChangu response structure:", JSON.stringify(response.data, null, 2));
 
-    const checkoutUrl = response.data?.data?.checkout_url || response.data?.checkout_url;
+    // Robust parsing - try multiple common paths
+    let checkoutUrl = (
+      response.data?.data?.checkout_url ||
+      response.data?.checkout_url ||
+      response.data?.data?.data?.checkout_url
+    );
+    console.log('Extracted checkoutUrl:', checkoutUrl);
 
     const payment = await prisma.payment.create({
       data: {

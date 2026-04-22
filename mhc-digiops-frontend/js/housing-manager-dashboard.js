@@ -2,7 +2,8 @@ let currentHouseId = null;
 const token = localStorage.getItem("token");
 const role = localStorage.getItem("role");
 
-if (role !== "housing_manager") {
+// Make role check more flexible
+if (!role || (role.toLowerCase() !== "housing_manager" && role.toLowerCase() !== "housing manager")) {
     alert("Access denied");
     window.location.href = "index.html";
 }
@@ -182,13 +183,31 @@ async function loadTenantUsers() {
         const res = await fetch("http://localhost:3000/api/admin/users", {
             headers: { Authorization: `Bearer ${token}` }
         });
+        
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
         const users = await res.json();
         const select = document.getElementById("tenantUserId");
-        if (!select) return;
+        if (!select) {
+            console.error("tenantUserId select element not found");
+            return;
+        }
+        
         select.innerHTML = '<option value="">Select User Account</option>';
 
-        // Filter for users with the 'tenant' role
-        users.filter(u => u.role.toLowerCase() === 'tenant').forEach(user => {
+// Show all users except managers/admins - backend validates tenant role
+        const tenantUsers = users.filter(u => u.role && !['housing_manager', 'admin'].includes(u.role.toLowerCase()));
+        
+        if (tenantUsers.length === 0) {
+            select.innerHTML = '<option value="">No available users - register users first</option>';
+            console.log('No potential tenant users found');
+            return;
+        }
+        console.log(`Loaded ${tenantUsers.length} users for tenant dropdown`);
+        
+        tenantUsers.forEach(user => {
             const option = document.createElement("option");
             option.value = user.id;
             option.textContent = `${user.name} (${user.email})`;
@@ -196,19 +215,35 @@ async function loadTenantUsers() {
         });
     } catch (error) {
         console.error("Load tenant users error:", error);
+        const select = document.getElementById("tenantUserId");
+        if (select) {
+            select.innerHTML = '<option value="">Error loading users</option>';
+        }
     }
 }
 
 async function loadAvailableHouses() {
     try {
-        const res = await fetch("http://localhost:3000/api/houses/map", {
+        console.log('Loading available houses from API...');
+        const res = await fetch("http://localhost:3000/api/houses/available", {
             headers: { Authorization: `Bearer ${token}` }
         });
+
+// Backend has /available endpoint, no fallback needed
+        // Removed fallback since getAvailableHouses() implemented
+        
         const houses = await res.json();
         const select = document.getElementById("tenantHouseId");
         if (!select) return;
-        select.innerHTML = '<option value="">Select House</option>';
 
+        if (houses.length === 0) {
+            select.innerHTML = '<option value="">No available houses found</option>';
+            console.log('No available houses');
+            return;
+        }
+        console.log(`Loaded ${houses.length} available houses`);
+        
+        select.innerHTML = '<option value="">Select House</option>';
         houses.forEach(house => {
             const option = document.createElement("option");
             option.value = house.id;
@@ -217,13 +252,30 @@ async function loadAvailableHouses() {
         });
     } catch (error) {
         console.error("Load available houses error:", error);
+        const select = document.getElementById("tenantHouseId");
+        if (select) {
+            select.innerHTML = '<option value="">Error loading houses</option>';
+        }
     }
 }
 
 function showAddTenantForm() {
-    document.getElementById("addTenantForm").style.display = "block";
-    loadAvailableHouses();
-    loadTenantUsers(); // Populate users dropdown too
+    console.log("Showing add tenant form");
+    const form = document.getElementById("addTenantForm");
+    if (form) {
+        // Clear and load dropdowns
+        document.getElementById("tenantUserId").innerHTML = '<option value="">Loading users...</option>';
+        document.getElementById("tenantHouseId").innerHTML = '<option value="">Loading houses...</option>';
+        form.style.display = "block";
+        console.log("Add tenant form displayed, loading dropdowns");
+        Promise.all([loadTenantUsers(), loadAvailableHouses()]).then(() => {
+            console.log('Dropdowns populated');
+        });
+        
+    }else {
+        console.error("Add tenant form element not found");
+    }
+    
 }
 
 function hideAddTenantForm() {

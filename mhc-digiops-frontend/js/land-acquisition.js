@@ -93,10 +93,10 @@ document.getElementById("landForm").addEventListener("submit", async (e) => {
                 title: "Success!",
                 text: "Form submitted successfully!",
                 icon: "success",
-                confirmButtonText: "OK"
+                confirm: "OK"
             }).then(() => {
                 // Reset the form after user clicks "OK"
-                window.location.href = "/user-dashboard.html";
+                window.location.href = "user-dashboard.html";
             }); 
 
             document.getElementById("landForm").reset();

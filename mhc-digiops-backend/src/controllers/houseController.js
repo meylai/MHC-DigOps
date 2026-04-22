@@ -44,3 +44,29 @@ export const getHouseDetails = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
+export const getAvailableHouses = async (req, res) => {
+    try {
+        // Find houses that don't have any tenants
+        const availableHouses = await prisma.house.findMany({
+            where: {
+                tenants: {
+                    none: {}  // This means no tenants associated
+                }
+            },
+            select: {
+                id: true,
+                address: true,
+                location: true,
+                status: true,
+                latitude: true,
+                longitude: true,
+            }
+        });
+
+        res.json(availableHouses);
+    } catch (error) {
+        console.error("Available houses fetch error:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};

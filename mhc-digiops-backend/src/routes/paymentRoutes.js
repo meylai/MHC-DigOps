@@ -4,7 +4,8 @@ import { authenticate } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/payments", createPayment);
+router.post("/payments", authenticate, createPayment);
+router.put("/:tenantId/pay", authenticate, createPayment);
 router.get("/payments/history", authenticate, getPaymentHistory);
 
 export default router;

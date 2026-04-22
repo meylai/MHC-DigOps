@@ -34,12 +34,15 @@ async function loadTenantProfile() {
         // If tenantId is not in localStorage, it means the user is not associated with a tenant record,
         // or the profile endpoint failed to retrieve it.
 
-        if (!tenantId) {
-            document.getElementById("tenantName").textContent = "Not set";
-            document.getElementById("tenantHouse").textContent = "Not assigned";
-            document.getElementById("tenantRentStatus").textContent = "Unknown";
-            return;
-        }
+    if (!tenantId) {
+        const tenantName = document.getElementById("tenantName");
+        const tenantHouse = document.getElementById("tenantHouse");
+        const tenantRentStatus = document.getElementById("tenantRentStatus");
+        if (tenantName) tenantName.textContent = "Not set";
+        if (tenantHouse) tenantHouse.textContent = "Not assigned";
+        if (tenantRentStatus) tenantRentStatus.textContent = "Unknown";
+        return;
+    }
 
         const response = await fetch(`http://localhost:3000/api/tenants/${tenantId}`, {
             headers: {
@@ -52,9 +55,6 @@ async function loadTenantProfile() {
             document.getElementById("tenantName").textContent = tenant.name;
             document.getElementById("tenantHouse").textContent = tenant.house?.address || "Not assigned";
             document.getElementById("tenantRentStatus").textContent = tenant.rentStatus;
-            if (tenant.houseId) {
-                localStorage.setItem("houseId", tenant.houseId);
-            }
         } else {
             console.error("Failed to load tenant profile");
         }
@@ -418,15 +418,12 @@ async function submitMaintenance() {
 function payRent() {
     const amount = Number(document.getElementById("rentAmount").value);
     let email = localStorage.getItem("email");
-    const tenantId = localStorage.getItem("tenantId");
-    const houseId = localStorage.getItem("houseId");
 
     if (!amount || amount <= 0) {
         alert("Please enter a valid rent amount.");
         return;
     }
 
-    // Fallback email retrieval from token if missing from localStorage
     if (!email) {
         const token = localStorage.getItem("token");
         if (token) {
@@ -445,48 +442,42 @@ function payRent() {
         return;
     }
 
-    fetch("http://localhost:3000/api/pay-rent", {
-        method: "POST",
-        headers: {
+    const headers = {
             "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            amount,
-            email,
-            tenantId: tenantId ? Number(tenantId) : null,
-            houseId: houseId ? Number(houseId) : null,
-            method: "PayChangu",
-        }),
-    })
+        };
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
+        fetch("http://localhost:3000/api/pay-rent", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                amount,
+                email,
+                method: "PayChangu",
+            }),
+        })
         .then(async (response) => {
             const data = await response.json();
-            console.log("Payment response:", response.status, data); // Debug log
+            console.log("paymentDetails response:", data); // Debug null paymentDetails
 
-            if (response.ok && data.paymentUrl) {
+            if (response.ok && data && data.paymentUrl) {
+                console.log("Redirecting to paymentUrl:", data.paymentUrl);
                 window.location.href = data.paymentUrl;
                 return;
             }
 
-            // Handle different error formats
-            let errorMessage = "Failed to initiate payment";
-            if (data.error) {
-                if (typeof data.error === "string") {
-                    errorMessage = data.error;
-                } else if (data.error.message) {
-                    errorMessage = data.error.message;
-                } else if (typeof data.error === "object") {
-                    // If error is an object, try to stringify it or extract useful info
-                    errorMessage = data.error.details || data.error.toString() || "Unknown error occurred";
-                }
-            } else if (data.message) {
-                errorMessage = data.message;
-            }
-
+            // Safe null checks to prevent React state crashes
+            const errorMessage = data?.error || data?.message || "Failed to initiate payment. Please check console.";
+            console.error("Payment initiation failed:", { status: response.status, data });
+            
             throw new Error(errorMessage);
         })
         .catch((error) => {
             console.error("Rent payment error:", error);
-            alert("Payment failed:" + (error.message || JSON.stringify(error)));
+            console.log("paymentDetails was null or invalid:", error.message.includes('null') ? 'yes' : 'no');
+            alert(`Payment failed: ${error.message || 'Unknown error. Check network/console.'}`);
         });
 }
 
